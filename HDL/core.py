@@ -1,4 +1,6 @@
-#
+# Modified CVA5 core.py to instantiate ABACUS IP over wishbone, and wire nets from the core to ABACUS
+
+
 # This file is part of LiteX.
 #
 # Copyright (c) 2022 Eric Matthews <eric.charles.matthews@gmail.com>
