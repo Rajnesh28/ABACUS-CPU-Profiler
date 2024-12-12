@@ -193,9 +193,11 @@ generate if (INCLUDE_CACHE_PROFILER) begin : gen_cache_profiler_if
         .icache_request_counter(icache_request_counter_reg),
         .icache_hit_counter(icache_hit_counter_reg),
         .icache_miss_counter(icache_miss_counter_reg),
+        .icache_line_fill_latency_counter(icache_line_fill_latency_counter_reg),
         .dcache_request_counter(dcache_request_counter_reg),
         .dcache_hit_counter(dcache_hit_counter_reg),
-        .dcache_miss_counter(dcache_miss_counter_reg)
+        .dcache_miss_counter(dcache_miss_counter_reg),
+        .dcache_line_fill_latency_counter_reg(dcache_line_fill_latency_counter_reg)
     );
 end endgenerate
 
