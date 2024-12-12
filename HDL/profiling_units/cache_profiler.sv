@@ -1,4 +1,4 @@
-module sim_cache_profiler (
+module cache_profiler (
     input logic clk,
     input logic rst,
     input logic enable,
@@ -9,24 +9,32 @@ module sim_cache_profiler (
     input logic dcache_hit,
     input logic dcache_request,
 
+    input logic icache_line_fill_in_progress,
+    input logic dcache_line_fill_in_progress,
+
     output logic [31:0] icache_hit_counter,
     output logic [31:0] icache_miss_counter,
     output logic [31:0] icache_request_counter,
 
     output logic [31:0] dcache_hit_counter,
     output logic [31:0] dcache_miss_counter,
-    output logic [31:0] dcache_request_counter
+    output logic [31:0] dcache_request_counter,
+
+    output logic [31:0] icache_line_fill_latency_counter,
+    output logic [31:0] dcache_line_fill_latency_counter
 );
 
-reg[31:0] icache_request_counter_reg        = 32'h0;;
-reg[31:0] dcache_request_counter_reg        = 32'h0;;
+reg[31:0] icache_request_counter_reg = 32'h0;
+reg[31:0] dcache_request_counter_reg = 32'h0;
 
-reg[31:0] icache_miss_counter_reg        = 32'h0;;
-reg[31:0] dcache_miss_counter_reg        = 32'h0;;
+reg[31:0] icache_miss_counter_reg = 32'h0;
+reg[31:0] dcache_miss_counter_reg = 32'h0;
 
-reg[31:0] icache_hit_counter_reg        = 32'h0;;
-reg[31:0] dcache_hit_counter_reg        = 32'h0;;
+reg[31:0] icache_hit_counter_reg = 32'h0;
+reg[31:0] dcache_hit_counter_reg = 32'h0;
 
+reg[31:0] icache_line_fill_latency_counter_reg = 32'h0;
+reg[31:0] dcache_line_fill_latency_counter_reg = 32'h0;
 
 typedef enum logic [1:0] {
     IDLE = 2'b00,
@@ -122,14 +130,36 @@ always_ff @(posedge clk or posedge rst) begin
     end
 end
 
-always_comb begin
-icache_request_counter <= icache_request_counter_reg;
-icache_hit_counter <= icache_request_counter_reg - icache_miss_counter_reg;
-icache_miss_counter <= icache_miss_counter_reg;
+always_ff @(posedge clk or posedge rst) begin
+    if (rst | ~enable) begin
+        icache_line_fill_latency_counter_reg <= 32'h0;        
+    end else begin
+        if (icache_line_fill_in_progress) begin
+            icache_line_fill_latency_counter_reg <= icache_line_fill_latency_counter_reg + 1;
+        end
+    end
+end
 
-dcache_request_counter <= dcache_request_counter_reg;
-dcache_hit_counter <= dcache_hit_counter_reg;
-dcache_miss_counter <= dcache_request_counter_reg - dcache_hit_counter_reg;
+always_ff @(posedge clk or posedge rst) begin
+    if (rst | ~enable) begin
+        dcache_line_fill_latency_counter_reg <= 32'h0;        
+    end else begin
+        if (dcache_line_fill_in_progress) begin
+            dcache_line_fill_latency_counter_reg <= dcache_line_fill_latency_counter_reg + 1;
+        end
+    end
+end
+
+always_comb begin
+    icache_request_counter <= icache_request_counter_reg;
+    icache_hit_counter <= icache_request_counter_reg - icache_miss_counter_reg;
+    icache_miss_counter <= icache_miss_counter_reg;
+    icache_line_fill_latency_counter <= icache_line_fill_latency_counter_reg;
+
+    dcache_request_counter <= dcache_request_counter_reg;
+    dcache_hit_counter <= dcache_hit_counter_reg;
+    dcache_miss_counter <= dcache_request_counter_reg - dcache_hit_counter_reg;
+    dcache_line_fill_latency_counter <= dcache_line_fill_latency_counter_reg;
 end
 
 endmodule

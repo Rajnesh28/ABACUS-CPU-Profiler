@@ -1,6 +1,4 @@
 # Modified CVA5 core.py to instantiate ABACUS IP over wishbone, and wire nets from the core to ABACUS
-
-
 # This file is part of LiteX.
 #
 # Copyright (c) 2022 Eric Matthews <eric.charles.matthews@gmail.com>
@@ -123,9 +121,9 @@ class CVA5(CPU):
                 if line.strip() != '':
                     platform.add_source(os.path.join(cva5_path, line.strip()))
         platform.add_source(os.path.join(cva5_path, "examples/litex/litex_wrapper.sv"))
-        platform.add_source(os.path.join(cva5_path, "/local-scratch/localhome/rajneshj/USRA/litex/litex/soc/cores/cpu/cva5/sim_abacus_top.sv"))
-        platform.add_source(os.path.join(cva5_path, "/local-scratch/localhome/rajneshj/USRA/litex/litex/soc/cores/cpu/cva5/sim_instruction_profiler.sv"))
-        platform.add_source(os.path.join(cva5_path, "/local-scratch/localhome/rajneshj/USRA/litex/litex/soc/cores/cpu/cva5/sim_cache_profiler.sv"))
+        platform.add_source(os.path.join(cva5_path, "/localhome/rajneshj/USRA/ABACUS/HDL/abacus_top.sv"))
+        platform.add_source(os.path.join(cva5_path, "/localhome/rajneshj/USRA/ABACUS/HDL/profiling_units/instruction_profiler.sv"))
+        platform.add_source(os.path.join(cva5_path, "/localhome/rajneshj/USRA/ABACUS/HDL/profiling_units/cache_profiler.sv"))
 
     def do_finalize(self):
         assert hasattr(self, "reset_address")
@@ -238,20 +236,26 @@ class CVA5(CPU):
 
         abacus_icache_request = Signal()
         abacus_icache_miss = Signal()
+        abacus_icache_line_fill_in_progress = Signal()
 
         abacus_dcache_request = Signal()
         abacus_dcache_hit = Signal()
-
+        abacus_dcache_line_fill_in_progress = Signal()
+        
         self.cpu_params.update (
             o_abacus_instruction = abacus_instruction,
             o_abacus_instruction_issued = abacus_instruction_issued,
+
             o_abacus_icache_request = abacus_icache_request,
             o_abacus_dcache_request = abacus_dcache_request,
             o_abacus_icache_miss = abacus_icache_miss,
-            o_abacus_dcache_hit = abacus_dcache_hit
+            o_abacus_dcache_hit = abacus_dcache_hit,
+
+            o_abacus_icache_line_fill_in_progress = abacus_icache_line_fill_in_progress,
+            o_abacus_dcache_line_fill_in_progress = abacus_dcache_line_fill_in_progress
         )
         self.testbus = testbus = wishbone.Interface(data_width=32, address_width=32, addressing="byte")
-        self.specials += Instance("sim_abacus_top",
+        self.specials += Instance("abacus_top",
             p_ABACUS_BASE_ADDR = 0xf0030000,
             p_INCLUDE_INSTRUCTION_PROFILER = 0x1,
             p_INCLUDE_CACHE_PROFILER = 0x1,
@@ -268,9 +272,10 @@ class CVA5(CPU):
             i_abacus_instruction_issued = abacus_instruction_issued,
             i_abacus_icache_request = abacus_icache_request,
             i_abacus_icache_miss = abacus_icache_miss,
+            i_abacus_icache_line_fill_in_progress = abacus_icache_line_fill_in_progress,
             i_abacus_dcache_request = abacus_dcache_request,
-            i_abacus_dcache_hit = abacus_dcache_hit
-
+            i_abacus_dcache_hit = abacus_dcache_hit,
+            i_abacus_dcache_line_fill_in_progress = abacus_dcache_line_fill_in_progress
             # i_axi_awvalid = Open(),
             # i_axi_awaddr = Open(),
             # i_axi_wvalid = Open(),
@@ -288,4 +293,3 @@ class CVA5(CPU):
         )
 
         soc.bus.add_slave("test", testbus, region=SoCRegion(origin=self.test_base, size=0x1_0000, cached=False))
-
