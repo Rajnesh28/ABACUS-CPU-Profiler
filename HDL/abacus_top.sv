@@ -66,18 +66,22 @@ localparam logic [31:0] CACHE_PROFILE_UNIT_BASE_ADDR = ABACUS_BASE_ADDR + 16'h02
 localparam logic [31:0] ICACHE_REQUEST_COUNTER_ADDR          = CACHE_PROFILE_UNIT_BASE_ADDR + 16'h0000;
 localparam logic [31:0] ICACHE_HIT_COUNTER_ADDR              = CACHE_PROFILE_UNIT_BASE_ADDR + 16'h0004;
 localparam logic [31:0] ICACHE_MISS_COUNTER_ADDR             = CACHE_PROFILE_UNIT_BASE_ADDR + 16'h0008;
+localparam logic [31:0] ICACHE_LINE_FILL_LATENCY_ADDR        = CACHE_PROFILE_UNIT_BASE_ADDR + 16'h000C;
 
 localparam logic [31:0] DCACHE_REQUEST_COUNTER_ADDR          = CACHE_PROFILE_UNIT_BASE_ADDR + 16'h0010;
 localparam logic [31:0] DCACHE_HIT_COUNTER_ADDR              = CACHE_PROFILE_UNIT_BASE_ADDR + 16'h0014;
 localparam logic [31:0] DCACHE_MISS_COUNTER_ADDR             = CACHE_PROFILE_UNIT_BASE_ADDR + 16'h0018;
+localparam logic [31:0] DCACHE_LINE_FILL_LATENCY_ADDR        = CACHE_PROFILE_UNIT_BASE_ADDR + 16'h001C;
 
 reg [31:0] cache_profile_unit_enable_reg;
 reg [31:0] icache_request_counter_reg;
 reg [31:0] icache_hit_counter_reg;
 reg [31:0] icache_miss_counter_reg;
+reg [31:0] icache_line_fill_latency_counter_reg;
 reg [31:0] dcache_request_counter_reg;
 reg [31:0] dcache_hit_counter_reg;
 reg [31:0] dcache_miss_counter_reg;
+reg [31:0] dcache_line_fill_latency_counter_reg;
 
 // Wishbone implementation derived from
 // https://zipcpu.com/zipcpu/2017/05/29/simple-wishbone.html
