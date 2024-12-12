@@ -106,7 +106,8 @@ module tb_abacus_top;
         $display("JUMP_COUNT: %h", dut.jump_counter_reg);
         $display("SYSTEM_PRIVILEGE_COUNT: %h", dut.system_privilege_counter_reg);
         $display("ATOMIC_COUNT: %h", dut.atomic_counter_reg);
-
+    
+        // Assert values of internal registers bypassing having to read them out via bus logic
         assert(dut.load_word_counter_reg == 32'd7) else $fatal("Assertion failed for LOAD_WORD_COUNT");
         assert(dut.store_word_counter_reg == 32'd3) else $fatal("Assertion failed for STORE_WORD_COUNT");
         assert(dut.addition_counter_reg == 32'd12) else $fatal("Assertion failed for ADD_COUNTER_COUNT");
