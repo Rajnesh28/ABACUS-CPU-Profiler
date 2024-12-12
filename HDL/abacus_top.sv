@@ -1,4 +1,4 @@
-module sim_abacus_top
+module abacus_top
 #(
     parameter [31:0] ABACUS_BASE_ADDR = 32'hf0030000,
     parameter logic INCLUDE_INSTRUCTION_PROFILER = 1'b1,
