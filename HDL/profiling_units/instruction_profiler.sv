@@ -86,7 +86,7 @@ always_ff @(posedge clk) begin
             // I-type
             7'b0010011: begin
                 case (instruction[14:12]) // Check funct3
-                    3'b000: add_counter_reg <= add_counter_reg + 1;
+                    3'b000: addition_counter_reg <= addition_counter_reg + 1;
                     3'b001: shift_bitwise_counter_reg <= shift_bitwise_counter_reg + 1;
                     3'b010: comparison_counter_reg <= comparison_counter_reg + 1;
                     3'b011: comparison_counter_reg <= comparison_counter_reg + 1;
@@ -101,8 +101,8 @@ always_ff @(posedge clk) begin
 end
 
 always_comb begin
-    load_word                <= load_word_counter_reg;
-    store_word               <= store_word_counter_reg;
+    load_word_counter        <= load_word_counter_reg;
+    store_word_counter       <= store_word_counter_reg;
     addition_counter         <= addition_counter_reg;
     subtraction_counter      <= subtraction_counter_reg;
     logical_bitwise_counter  <= logical_bitwise_counter_reg;
