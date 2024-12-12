@@ -94,25 +94,6 @@ always_ff @(posedge clk or posedge rst) begin
         instruction_profile_unit_enable_reg <= 32'h0;
         cache_profile_unit_enable_reg <= 32'h0;
 
-        load_word_counter_reg <= 32'h0;
-        store_word_counter_reg <= 32'h0;
-        addition_counter_reg <= 32'h0;
-        subtraction_counter_reg <= 32'h0;
-        logical_bitwise_counter_reg <= 32'h0;
-        shift_bitwise_counter_reg <= 32'h0;
-        comparison_counter_reg <= 32'h0;
-        branch_counter_reg <= 32'h0;
-        jump_counter_reg <= 32'h0;
-        system_privilege_counter_reg <= 32'h0;
-        atomic_counter_reg <= 32'h0;
-
-        icache_request_counter_reg <= 32'h0;
-        icache_hit_counter_reg <= 32'h0;
-        icache_miss_counter_reg <= 32'h0;
-        dcache_request_counter_reg <= 32'h0;
-        dcache_hit_counter_reg <= 32'h0;
-        dcache_miss_counter_reg <= 32'h0;
-
     end else begin
         // When a valid transaction is ongoing and acknowledged
         wb_ack <= wb_cyc & wb_stb & ~wb_ack;  // One-cycle acknowledge
@@ -150,9 +131,11 @@ always_comb begin
             ICACHE_REQUEST_COUNTER_ADDR: wb_dat_o <= icache_request_counter_reg;
             ICACHE_HIT_COUNTER_ADDR: wb_dat_o <= icache_hit_counter_reg;
             ICACHE_MISS_COUNTER_ADDR: wb_dat_o <= icache_miss_counter_reg;
+            ICACHE_LINE_FILL_LATENCY_ADDR: wb_dat_o <= icache_line_fill_latency_counter_reg;
             DCACHE_REQUEST_COUNTER_ADDR: wb_dat_o <= dcache_request_counter_reg;
             DCACHE_HIT_COUNTER_ADDR: wb_dat_o <= dcache_hit_counter_reg;
             DCACHE_MISS_COUNTER_ADDR: wb_dat_o <= dcache_miss_counter_reg;
+            DCACHE_LINE_FILL_LATENCY_ADDR: wb_dat_o <= dcache_line_fill_latency_counter_reg;
             default: wb_dat_o = 32'h0;   // Invalid address, return zero
         endcase
     end
@@ -201,7 +184,7 @@ generate if (INCLUDE_CACHE_PROFILER) begin : gen_cache_profiler_if
         .dcache_request_counter(dcache_request_counter_reg),
         .dcache_hit_counter(dcache_hit_counter_reg),
         .dcache_miss_counter(dcache_miss_counter_reg),
-        .dcache_line_fill_latency_counter_reg(dcache_line_fill_latency_counter_reg)
+        .dcache_line_fill_latency_counter(dcache_line_fill_latency_counter_reg)
     );
 end endgenerate
 
