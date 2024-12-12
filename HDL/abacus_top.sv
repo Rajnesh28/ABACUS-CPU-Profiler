@@ -15,6 +15,8 @@ module abacus_top
     input logic abacus_dcache_request,
     input logic abacus_icache_miss,
     input logic abacus_dcache_hit,
+    input logic abacus_icache_line_fill_in_progress,
+    input logic abacus_dcache_line_fill_in_progress,
 
     // Wishbone signals
     input logic wb_cyc,
@@ -156,7 +158,7 @@ end
 
 // Instruction Profiler
 generate if (INCLUDE_INSTRUCTION_PROFILER) begin : gen_instruction_profiler_if
-    sim_instruction_profiler # ()
+    instruction_profiler # ()
     instruction_profiler_block (
         .clk(clk),
         .rst(rst),
@@ -179,7 +181,7 @@ end endgenerate
 
 // Cache Profiler
 generate if (INCLUDE_CACHE_PROFILER) begin : gen_cache_profiler_if
-    sim_cache_profiler # ()
+    cache_profiler # ()
     cache_profiler_block (
         .clk(clk),
         .rst(rst),

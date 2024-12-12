@@ -1,4 +1,4 @@
-module sim_cache_profiler (
+module cache_profiler (
     input logic clk,
     input logic rst,
     input logic enable,
