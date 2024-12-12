@@ -1,0 +1,81 @@
+// Load Instructions (7)
+00002003  // LB x0, 0(x0)
+00003003  // LH x0, 0(x0)
+00004003  // LW x0, 0(x0)
+00005003  // LBU x0, 0(x0)
+00006003  // LHU x0, 0(x0)
+00007003  // LD x0, 0(x0)
+00008003  // LWU x0, 0(x0)
+
+// Store Instructions (3)
+00002023  // SB x0, 0(x0)
+00003023  // SH x0, 0(x0)
+00004023  // SW x0, 0(x0)
+
+// Addition Instructions (12)
+00000033  // ADD x0, x0, x0
+000000b3  // ADD x1, x1, x1
+00c00033  // ADD x0, x0, x12
+00000233  // ADD x4, x0, x0
+000002b3  // ADD x5, x1, x0
+00c00233  // ADD x4, x0, x12
+00000333  // ADD x6, x0, x0
+000003b3  // ADD x7, x1, x0
+00c00333  // ADD x6, x0, x12
+00000433  // ADD x8, x0, x0
+000004b3  // ADD x9, x1, x0
+00c00433  // ADD x8, x0, x12
+
+// Subtraction Instructions (2)
+40000033  // SUB x0, x0, x0
+400000b3  // SUB x1, x1, x1
+
+// Branch Instructions (6)
+00000063  // BEQ x0, x0, 0
+000000e3  // BNE x0, x0, 0
+00000163  // BEQ x0, x0, 2
+000001e3  // BNE x0, x0, 2
+00000263  // BEQ x0, x0, 4
+000002e3  // BNE x0, x0, 4
+
+// Logical Bitwise Instructions (6)
+00002013  // ANDI x0, x0, 0
+00003013  // ORI x0, x0, 0
+00004013  // XORI x0, x0, 0
+00005013  // SLLI x0, x0, 0
+00006013  // SRLI x0, x0, 0
+00007013  // SRAI x0, x0, 0
+
+// Comparison Instructions (8)
+00002033  // SLT x0, x0, x0
+000020b3  // SLTU x1, x1, x1
+00002233  // SLT x4, x0, x0
+000022b3  // SLTU x5, x1, x0
+00002333  // SLT x6, x0, x0
+000023b3  // SLTU x7, x1, x0
+00002433  // SLT x8, x0, x0
+000024b3  // SLTU x9, x1, x0
+
+// System Privilege Instructions (5)
+00000073  // ECALL
+00100073  // EBREAK
+00200073  // URET
+10200073  // SRET
+30200073  // MRET
+
+// Atomic Instructions (7)
+2000202f  // LR.W x0, (x0)
+2000302f  // SC.W x0, x1, (x0)
+2000402f  // AMOSWAP.W x0, x0, (x0)
+2000502f  // AMOADD.W x0, x0, (x0)
+2000602f  // AMOXOR.W x0, x0, (x0)
+2000702f  // AMOAND.W x0, x0, (x0)
+2000802f  // AMOOR.W x0, x0, (x0)
+
+// Bitwise Shift Instructions (6)
+00102013  // SLLI x4, x0, 1
+00103013  // SRLI x4, x0, 1
+00104013  // SRAI x4, x0, 1
+00105013  // SLLI x5, x0, 1
+00106013  // SRLI x5, x0, 1
+00107013  // SRAI x5, x0, 1
