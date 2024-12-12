@@ -1,4 +1,4 @@
-module sim_instruction_profiler(
+module instruction_profiler(
     input logic clk,
     input logic rst,
     input logic enable,
