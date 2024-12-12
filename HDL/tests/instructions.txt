@@ -72,10 +72,11 @@
 2000702f  // AMOAND.W x0, x0, (x0)
 2000802f  // AMOOR.W x0, x0, (x0)
 
-// Bitwise Shift Instructions (6)
-00102013  // SLLI x4, x0, 1
-00103013  // SRLI x4, x0, 1
-00104013  // SRAI x4, x0, 1
-00105013  // SLLI x5, x0, 1
-00106013  // SRLI x5, x0, 1
-00107013  // SRAI x5, x0, 1
+// Bitwise Shift (6)
+00102013  // SLLI x4, x0, 1 (Shift Left Logical Immediate, funct3 = 001)
+00503013  // SRLI x4, x0, 1 (Shift Right Logical Immediate, funct3 = 101)
+40503013  // SRAI x4, x0, 1 (Shift Right Arithmetic Immediate, funct3 = 101)
+00105013  // SLLI x5, x0, 1 (Shift Left Logical Immediate, funct3 = 001)
+00506013  // SRLI x5, x0, 1 (Shift Right Logical Immediate, funct3 = 101)
+40506013  // SRAI x5, x0, 1 (Shift Right Arithmetic Immediate, funct3 = 101)
+
