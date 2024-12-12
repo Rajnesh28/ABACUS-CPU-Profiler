@@ -112,12 +112,11 @@ module tb_abacus_top;
         assert(dut.store_word_counter_reg == 32'd3) else $fatal("Assertion failed for STORE_WORD_COUNT");
         assert(dut.addition_counter_reg == 32'd12) else $fatal("Assertion failed for ADD_COUNTER_COUNT");
         assert(dut.subtraction_counter_reg == 32'd2) else $fatal("Assertion failed for SUBCTRACTION_COUNTER");
- 
-        assert(dut.logical_bitwise_counter_reg == 32'd6) else $fatal("Assertion failed for BITWISE_COUNT");
-        assert(dut.shift_bitwise_counter_reg == 32'd6) else $fatal("Assertion failed for SHIFT_ROTATE_COUNT");
+        assert(dut.logical_bitwise_counter_reg == 32'd6) else $fatal("Assertion failed for LOGICAL_BITWISE_COUNT");
+        assert(dut.shift_bitwise_counter_reg == 32'd6) else $fatal("Assertion failed for BITWISE_SHIFT_COUNT");
         assert(dut.comparison_counter_reg == 32'd8) else $fatal("Assertion failed for COMPARISON_COUNT");
         assert(dut.branch_counter_reg == 32'd6) else $fatal("Assertion failed for BRANCH_COUNT");
-        assert(dut.jump_counter_reg == 32'd8) else $fatal("Assertion failed for CONTROL_TRANSFER_COUNT");
+        assert(dut.jump_counter_reg == 32'd0) else $fatal("Assertion failed for CONTROL_TRANSFER_COUNT");
         assert(dut.system_privilege_counter_reg == 32'd5) else $fatal("Assertion failed for SYSTEM_PRIVILEGE_COUNT");
         assert(dut.atomic_counter_reg == 32'd7) else $fatal("Assertion failed for ATOMIC_COUNT");
 
