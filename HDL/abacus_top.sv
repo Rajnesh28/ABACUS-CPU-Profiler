@@ -7,28 +7,21 @@ module abacus_top
 )
 (
 
-`ifdef INCLUDE_INSTRUCTION_PROFILER
     input [31:0] abacus_instruction,
     input abacus_instruction_issued,
-`endif
 
-`ifdef INCLUDE_CACHE_PROFILER
     input logic abacus_icache_request,
     input logic abacus_dcache_request,
     input logic abacus_icache_miss,
     input logic abacus_dcache_hit,
     input logic abacus_icache_line_fill_in_progress,
     input logic abacus_dcache_line_fill_in_progress,
-`endif
 
-`ifdef WITH_AXI
     // AXI-Lite Interface
     // Implementation derived from
     // https://github.com/arhamhashmi01/Axi4-lite/blob/main/Axi4-lite-vivado/Axi4-lite-vivado.srcs/sources_1/new/axi4_lite_slave.sv 
     
     // Global signals
-    input              aclk,
-    input              aresetn,
 
     // Read address (input)
     input logic [31:0] s_araddr,
@@ -63,9 +56,8 @@ module abacus_top
 
     //Write response channel (output)
     output logic  [1:0]s_bresp,
-    output logic       s_bvalid
+    output logic       s_bvalid,
     
-`else
     // Wishbone
     // Implementation derived from
     // https://zipcpu.com/zipcpu/2017/05/29/simple-wishbone.html
@@ -79,8 +71,7 @@ module abacus_top
     input logic [31:0] wb_adr,
     input logic [31:0] wb_dat_i,
     output logic [31:0] wb_dat_o,
-    output logic wb_ack,
-`endif
+    output logic wb_ack
 
 );
 
@@ -193,11 +184,9 @@ generate if (WITH_AXI) begin : gen_axi_if
 
     assign s_bvalid = (state == WRESP_CHANNEL) ? 1 : 0;
     assign s_bresp  = (state == WRESP_CHANNEL) ? 0 : 0;
-
-    integer i;
     
-    always_ff @(posedge aclk) begin
-        if (~aresetn) begin
+    always_ff @(posedge clk) begin
+        if (rst) begin
             instruction_profile_unit_enable_reg <= 32'h0;
             cache_profile_unit_enable_reg <= 32'h0;
         end else begin
@@ -214,7 +203,7 @@ generate if (WITH_AXI) begin : gen_axi_if
     end
 
     always_ff @(posedge clk) begin
-        if (~aresetn) begin 
+        if (rst) begin 
             state <= IDLE;
         end else begin
             state <= next_state;
