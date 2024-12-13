@@ -193,27 +193,6 @@ generate if (WITH_AXI) begin : gen_axi_if
                 INSTRUCTION_PROFILE_UNIT_ENABLE_ADDR: instruction_profile_unit_enable_reg <= s_wdata;
                 CACHE_PROFILE_UNIT_ENABLE_ADDR: cache_profile_unit_enable_reg <= s_wdata;
 
-                LOAD_WORD_COUNTER_ADDR: load_word_counter_reg <= s_wdata;
-                STORE_WORD_COUNTER_ADDR: store_word_counter_reg <= s_wdata;
-                ADDITION_COUNTER_ADDR: addition_counter_reg <= s_wdata;
-                SUBTRACTION_COUNTER_ADDR: subtraction_counter_reg <= s_wdata;
-                LOGICAL_BITWISE_COUNTER_ADDR: logical_bitwise_counter_reg <= s_wdata;
-                SHIFT_BITWISE_COUNTER_ADDR: shift_bitwise_counter_reg <= s_wdata;
-                COMPARISON_COUNTER_ADDR: comparison_counter_reg <= s_wdata;
-                BRANCH_COUNTER_ADDR: branch_counter_reg <= s_wdata;
-                JUMP_COUNTER_ADDR: jump_counter_reg <= s_wdata;
-                SYSTEM_PRIVILEGE_COUNTER_ADDR: system_privilege_counter_reg <= s_wdata;
-                ATOMIC_COUNTER_ADDR: atomic_counter_reg <= s_wdata;
-
-                ICACHE_REQUEST_COUNTER_ADDR: icache_request_counter_reg <= s_wdata;
-                ICACHE_HIT_COUNTER_ADDR: icache_hit_counter_reg <= s_wdata;
-                ICACHE_MISS_COUNTER_ADDR: icache_miss_counter_reg <= s_wdata;
-                ICACHE_LINE_FILL_LATENCY_ADDR: icache_line_fill_latency_counter_reg <= s_wdata;
-
-                DCACHE_REQUEST_COUNTER_ADDR: dcache_request_counter_reg <= s_wdata;
-                DCACHE_HIT_COUNTER_ADDR: dcache_hit_counter_reg <= s_wdata;
-                DCACHE_MISS_COUNTER_ADDR: dcache_miss_counter_reg <= s_wdata;
-                DCACHE_LINE_FILL_LATENCY_ADDR: dcache_line_fill_latency_counter_reg <= s_wdata;
             endcase
             end else if (state == RADDR_CHANNEL) begin
                 addr <= S_ARADDR;
