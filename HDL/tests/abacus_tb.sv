@@ -63,6 +63,8 @@ module tb_abacus_top;
         $readmemh("/localhome/rajneshj/USRA/ABACUS/HDL/tests/instructions.txt", instruction_memory);
     end
 
+    /* Instruction Profiler Test */ 
+
     initial begin
         clk = 0;
         rst = 1;
@@ -120,6 +122,75 @@ module tb_abacus_top;
         assert(dut.system_privilege_counter_reg == 32'd5) else $fatal("Assertion failed for SYSTEM_PRIVILEGE_COUNT");
         assert(dut.atomic_counter_reg == 32'd7) else $fatal("Assertion failed for ATOMIC_COUNT");
 
-        $finish;
+        //Disable the profiling unit
+        wb_cyc <= 1;
+        wb_stb <= 1;
+        wb_we <= 1;
+        
+        wb_adr <= 32'hf0030004;
+        wb_dat_i <= 0;
+        
+        #20 
+
+        wb_cyc <= 0;
+        wb_stb <= 0;
+        wb_we <= 0;
+        
+        wb_adr <= 0;
+        wb_dat_i <= 0;
+
+        assert(dut.load_word_counter_reg == 32'd0) else $fatal("Assertion failed for LOAD_WORD_COUNT");
+        assert(dut.store_word_counter_reg == 32'd0) else $fatal("Assertion failed for STORE_WORD_COUNT");
+        assert(dut.addition_counter_reg == 32'd0 else $fatal("Assertion failed for ADD_COUNTER_COUNT");
+        assert(dut.subtraction_counter_reg == 32'd0) else $fatal("Assertion failed for SUBCTRACTION_COUNTER");
+        assert(dut.logical_bitwise_counter_reg == 32'd0) else $fatal("Assertion failed for LOGICAL_BITWISE_COUNT");
+        assert(dut.shift_bitwise_counter_reg == 32'd0) else $fatal("Assertion failed for BITWISE_SHIFT_COUNT");
+        assert(dut.comparison_counter_reg == 32'd0) else $fatal("Assertion failed for COMPARISON_COUNT");
+        assert(dut.branch_counter_reg == 32'd0) else $fatal("Assertion failed for BRANCH_COUNT");
+        assert(dut.jump_counter_reg == 32'd0) else $fatal("Assertion failed for CONTROL_TRANSFER_COUNT");
+        assert(dut.system_privilege_counter_reg == 32'd0) else $fatal("Assertion failed for SYSTEM_PRIVILEGE_COUNT");
+        assert(dut.atomic_counter_reg == 32'd0) else $fatal("Assertion failed for ATOMIC_COUNT");
     end
+
+    /* Cache Profiler Test */
+    initial begin
+        clk = 0;
+        rst = 1;
+        #10 rst = 0;
+
+        //Enable the profiling unit via Wishbone
+        wb_cyc <= 1;
+        wb_stb <= 1;
+        wb_we <= 1;
+        
+        wb_adr <= 32'hf0030008;
+        wb_dat_i <= 1;
+        
+        #20 
+
+        wb_cyc <= 0;
+        wb_stb <= 0;
+        wb_we <= 0;
+        
+        wb_adr <= 0;
+        wb_dat_i <= 0;
+
+        abacus_icache_request <= 1;
+        #50 // Should only register as a single icache request count
+
+        abacus_icache_request <= 0;
+        abacus_icache_miss <= 1;
+        abacus_icache_line_fill_in_progress <= 1;
+        #50 // Should only register as asingle icache miss, and the count for line fill in progress should be 50/10 = 5 clock cycles of latency
+
+
+        abacus_icache_request <= 0;
+        abacus_icache_miss <= 0;
+        abacus_icache_line_fill_in_progress <= 0;
+
+        assert(dut.abacus_icache_request == 32'd1) else $fatal("Assertion failed for ICACHE_REQUEST");
+        assert(dut.abacus_icache_miss == 32'd1) else $fatal("Assertion failed for ICACHE_MISS");
+        $finish    
+    end
+
 endmodule

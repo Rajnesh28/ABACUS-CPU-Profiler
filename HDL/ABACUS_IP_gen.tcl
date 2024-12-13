@@ -93,9 +93,9 @@ if {[string equal [get_filesets -quiet sources_1] ""]} {
 
 #import all sources from abacus repo directory
 
-import_files -norecurse $origin_dir/HDL/abacus_top.sv -force
-import_files -norecurse $origin_dir/HDL/profiling_units/instruction_profiler.sv -force
-import_files -norecurse $origin_dir/HDL/profiling_units/cache_profiler.sv -force
+import_files -norecurse $origin_dir/abacus_top.sv -force
+import_files -norecurse $origin_dir/profiling_units/instruction_profiler.sv -force
+import_files -norecurse $origin_dir/profiling_units/cache_profiler.sv -force
 
 # Set IP repository paths
 set obj [get_filesets sources_1]
@@ -108,7 +108,7 @@ update_ip_catalog -rebuild
 set obj [get_filesets sources_1]
 set_property -name "top" -value "abacus_top" -objects $obj
 set_property -name "top_auto_set" -value "0" -objects $obj
-set_property -name "top_file" -value " ${origin_dir}/HDL/abacus_top.sv" -objects $obj
+set_property -name "top_file" -value " ${origin_dir}/abacus_top.sv" -objects $obj
 
 
 puts "INFO: Project created:${_xil_proj_name_}"
@@ -126,9 +126,9 @@ ipx::save_core [ipx::current_core]
 set_property  ip_repo_paths  $origin_dir/${_xil_proj_name_} [current_project]
 current_project $_xil_proj_name_
 update_ip_catalog
-import_files -fileset [get_filesets sources_1] $origin_dir/HDL/abacus_top.sv
-import_files -fileset [get_filesets sources_1] $origin_dir/HDL/profiling_units/cache_profiler.sv
-import_files -fileset [get_filesets sources_1] $origin_dir/HDL/profiling_units/instruction_profiler.sv
+import_files -fileset [get_filesets sources_1] $origin_dir/abacus_top.sv
+import_files -fileset [get_filesets sources_1] $origin_dir/profiling_units/cache_profiler.sv
+import_files -fileset [get_filesets sources_1] $origin_dir/profiling_units/instruction_profiler.sv
 
 ipx::add_subcore xilinx.com:ip:ila:6.2 [ipx::get_file_groups xilinx_anylanguagesynthesis -of_objects [ipx::current_core]]
 
