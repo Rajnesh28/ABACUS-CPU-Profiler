@@ -127,7 +127,7 @@ reg [31:0] dcache_miss_counter_reg;
 reg [31:0] dcache_line_fill_latency_counter_reg;
 
 
-generate if (WITH_AXI) begin gen_axi_if
+generate if (WITH_AXI) begin : gen_axi_if
 
     logic write_addr, write_data;
     logic [31:0] addr;
@@ -251,7 +251,7 @@ generate if (WITH_AXI) begin gen_axi_if
 
 end endgenerate
 
-generate if (~WITH_AXI) begin gen_wishbone_if 
+generate if (~WITH_AXI) begin : gen_wishbone_if 
     // Wishbone Acknowledgement and Data Handling
     always_ff @(posedge clk or posedge rst) begin
         if (rst) begin
