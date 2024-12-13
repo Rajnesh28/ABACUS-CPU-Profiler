@@ -29,7 +29,7 @@ module abacus_top
     input logic [31:0] wb_adr,
     input logic [31:0] wb_dat_i,
     output logic [31:0] wb_dat_o,
-    output logic wb_ack
+    output logic wb_ack,
 
     // AXI-Lite Interface
     // Implementation derived from
