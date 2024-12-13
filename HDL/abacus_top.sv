@@ -178,7 +178,7 @@ generate if (WITH_AXI) begin : gen_axi_if
                 DCACHE_MISS_COUNTER_ADDR: s_rdata <= dcache_miss_counter_reg;
                 DCACHE_LINE_FILL_LATENCY_ADDR: s_rdata <= dcache_line_fill_latency_counter_reg;
             endcase
-        else begin
+	end else begin
             s_rdata <= 0;
         end
     end
@@ -187,11 +187,11 @@ generate if (WITH_AXI) begin : gen_axi_if
     assign s_awready = (state == WRITE_CHANNEL) ? 1 : 0;
     assign s_wready = (state == WRITE_CHANNEL) ? 1 : 0;
 
-    assign write_addr = S_AWVALID && S_AWREADY;
-    assign write_data = S_WREADY && S_WVALID;
+    assign write_addr = s_awvalid && s_awready;
+    assign write_data = s_wready && s_wvalid;
 
-    assign S_BVALID = (state == WRESP_CHANNEL) ? 1 : 0;
-    assign S_BRESP = (state == WRESP_CHANNEL) ? 0 : 0;
+    assign s_bvalid = (state == WRESP_CHANNEL) ? 1 : 0;
+    assign s_bresp  = (state == WRESP_CHANNEL) ? 0 : 0;
 
     integer i;
     
@@ -207,7 +207,7 @@ generate if (WITH_AXI) begin : gen_axi_if
 
             endcase
             end else if (state == RADDR_CHANNEL) begin
-                addr <= S_ARADDR;
+                addr <= s_araddr;
             end
         end 
     end
