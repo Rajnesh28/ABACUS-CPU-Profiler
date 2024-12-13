@@ -256,6 +256,7 @@ class CVA5(CPU):
         )
         self.testbus = testbus = wishbone.Interface(data_width=32, address_width=32, addressing="byte")
         self.specials += Instance("abacus_top",
+            p_WITH_AXI         = 0x0,
             p_ABACUS_BASE_ADDR = 0xf0030000,
             p_INCLUDE_INSTRUCTION_PROFILER = 0x1,
             p_INCLUDE_CACHE_PROFILER = 0x1,
@@ -275,21 +276,22 @@ class CVA5(CPU):
             i_abacus_icache_line_fill_in_progress = abacus_icache_line_fill_in_progress,
             i_abacus_dcache_request = abacus_dcache_request,
             i_abacus_dcache_hit = abacus_dcache_hit,
-            i_abacus_dcache_line_fill_in_progress = abacus_dcache_line_fill_in_progress
-            # i_axi_awvalid = Open(),
-            # i_axi_awaddr = Open(),
-            # i_axi_wvalid = Open(),
-            # i_axi_wdata = Open(),
-            # i_axi_bready = Open(),
-            # i_axi_arvalid = Open(),
-            # i_axi_araddr = Open(),
-            # i_axi_rready = Open(),
-            # o_axi_awready = Open(),
-            # o_axi_wready = Open(),
-            # o_axi_bvalid = Open(),
-            # o_axi_arready = Open(),
-            # o_axi_rvalid = Open(),
-            # o_axi_rdata = Open()
+            i_abacus_dcache_line_fill_in_progress = abacus_dcache_line_fill_in_progress,
+            i_s_awvalid = Open(),
+            i_s_awaddr = Open(),
+            i_s_wvalid = Open(),
+            i_s_wdata = Open(),
+            i_s_bready = Open(),
+            i_s_arvalid = Open(),
+            i_s_araddr = Open(),
+            i_s_rready = Open(),
+            o_s_awready = Open(),
+            o_s_wready = Open(),
+            o_s_bvalid = Open(),
+            o_s_arready = Open(),
+            o_s_rvalid = Open(),
+            o_s_rdata = Open()
         )
 
         soc.bus.add_slave("test", testbus, region=SoCRegion(origin=self.test_base, size=0x1_0000, cached=False))
+
