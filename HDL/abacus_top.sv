@@ -21,26 +21,11 @@ module abacus_top
     input logic abacus_dcache_line_fill_in_progress,
 `endif
 
-    // Wishbone
-    // Implementation derived from
-    // https://zipcpu.com/zipcpu/2017/05/29/simple-wishbone.html
-    // Wishbone signals
-`ifdef ~WITH_AXI
-    input logic clk,
-    input logic rst,
-    input logic wb_cyc,
-    input logic wb_stb,
-    input logic wb_we,
-    input logic [31:0] wb_adr,
-    input logic [31:0] wb_dat_i,
-    output logic [31:0] wb_dat_o,
-    output logic wb_ack,
-`endif
-
+`ifdef WITH_AXI
     // AXI-Lite Interface
     // Implementation derived from
     // https://github.com/arhamhashmi01/Axi4-lite/blob/main/Axi4-lite-vivado/Axi4-lite-vivado.srcs/sources_1/new/axi4_lite_slave.sv 
-`WITH_AXI
+    
     // Global signals
     input              aclk,
     input              aresetn,
@@ -79,6 +64,22 @@ module abacus_top
     //Write response channel (output)
     output logic  [1:0]s_bresp,
     output logic       s_bvalid
+    
+`else
+    // Wishbone
+    // Implementation derived from
+    // https://zipcpu.com/zipcpu/2017/05/29/simple-wishbone.html
+    
+    // Wishbone signals
+    input logic clk,
+    input logic rst,
+    input logic wb_cyc,
+    input logic wb_stb,
+    input logic wb_we,
+    input logic [31:0] wb_adr,
+    input logic [31:0] wb_dat_i,
+    output logic [31:0] wb_dat_o,
+    output logic wb_ack,
 `endif
 
 );
