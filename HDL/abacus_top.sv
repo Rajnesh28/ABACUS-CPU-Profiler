@@ -127,7 +127,7 @@ reg [31:0] dcache_miss_counter_reg;
 reg [31:0] dcache_line_fill_latency_counter_reg;
 
 
-generate (if(WITH_AXI)) begin gen_axi_if
+generate if (WITH_AXI) begin gen_axi_if
 
     logic write_addr, write_data;
     logic [31:0] addr;
@@ -140,7 +140,7 @@ generate (if(WITH_AXI)) begin gen_axi_if
 
     always_comb begin
         if (state == RDATA_CHANNEL) begin
-            case (addr) begin:
+            case (addr)
                 INSTRUCTION_PROFILE_UNIT_ENABLE_ADDR: s_rdata <= instruction_profile_unit_enable_reg;
                 CACHE_PROFILE_UNIT_ENABLE_ADDR: s_rdata <= cache_profile_unit_enable_reg;
 
@@ -189,7 +189,7 @@ generate (if(WITH_AXI)) begin gen_axi_if
             cache_profile_unit_enable_reg <= 32'h0;
         end else begin
             if (state == WRITE_CHANNEL) begin
-            case (s_awaddr) begin
+            case (s_awaddr)
                 INSTRUCTION_PROFILE_UNIT_ENABLE_ADDR: instruction_profile_unit_enable_reg <= s_wdata;
                 CACHE_PROFILE_UNIT_ENABLE_ADDR: cache_profile_unit_enable_reg <= s_wdata;
 
@@ -230,7 +230,7 @@ generate (if(WITH_AXI)) begin gen_axi_if
     end
 
     always_comb begin
-        case (state) begin
+        case (state)
             IDLE: begin
                 if (s_awvalid) begin
                     next_state = WRITE_CHANNEL;
@@ -251,7 +251,7 @@ generate (if(WITH_AXI)) begin gen_axi_if
 
 end endgenerate
 
-generate if (!(WITH_AXI)) begin gen_wishbone_if 
+generate if (~WITH_AXI) begin gen_wishbone_if 
     // Wishbone Acknowledgement and Data Handling
     always_ff @(posedge clk or posedge rst) begin
         if (rst) begin
