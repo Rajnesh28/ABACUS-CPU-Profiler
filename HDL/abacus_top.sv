@@ -6,23 +6,28 @@ module abacus_top
     parameter logic INCLUDE_CACHE_PROFILER       = 1'b1
 )
 (
-    input logic clk,
-    input logic rst,
 
-    //Nets from the core
+`ifdef INCLUDE_INSTRUCTION_PROFILER
     input [31:0] abacus_instruction,
     input abacus_instruction_issued,
+`endif
+
+`ifdef INCLUDE_CACHE_PROFILER
     input logic abacus_icache_request,
     input logic abacus_dcache_request,
     input logic abacus_icache_miss,
     input logic abacus_dcache_hit,
     input logic abacus_icache_line_fill_in_progress,
     input logic abacus_dcache_line_fill_in_progress,
+`endif
 
     // Wishbone
     // Implementation derived from
     // https://zipcpu.com/zipcpu/2017/05/29/simple-wishbone.html
     // Wishbone signals
+`ifdef ~WITH_AXI
+    input logic clk,
+    input logic rst,
     input logic wb_cyc,
     input logic wb_stb,
     input logic wb_we,
@@ -30,11 +35,16 @@ module abacus_top
     input logic [31:0] wb_dat_i,
     output logic [31:0] wb_dat_o,
     output logic wb_ack,
+`endif
 
     // AXI-Lite Interface
     // Implementation derived from
     // https://github.com/arhamhashmi01/Axi4-lite/blob/main/Axi4-lite-vivado/Axi4-lite-vivado.srcs/sources_1/new/axi4_lite_slave.sv 
-        
+`WITH_AXI
+    // Global signals
+    input              aclk,
+    input              aresetn,
+
     // Read address (input)
     input logic [31:0] s_araddr,
     input logic        s_arvalid,
@@ -69,6 +79,8 @@ module abacus_top
     //Write response channel (output)
     output logic  [1:0]s_bresp,
     output logic       s_bvalid
+`endif
+
 );
 
 // All addresses must be 4-byte (dword) aligned
@@ -183,8 +195,8 @@ generate if (WITH_AXI) begin : gen_axi_if
 
     integer i;
     
-    always_ff @(posedge clk) begin
-        if (rst) begin
+    always_ff @(posedge aclk) begin
+        if (~aresetn) begin
             instruction_profile_unit_enable_reg <= 32'h0;
             cache_profile_unit_enable_reg <= 32'h0;
         end else begin
@@ -201,7 +213,7 @@ generate if (WITH_AXI) begin : gen_axi_if
     end
 
     always_ff @(posedge clk) begin
-        if (rst) begin 
+        if (~aresetn) begin 
             state <= IDLE;
         end else begin
             state <= next_state;
