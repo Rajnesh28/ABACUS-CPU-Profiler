@@ -57,11 +57,11 @@ module tb_abacus_top;
     // Clock generation
     always #5 clk = ~clk;
 
-    // Load binary instructions from file or array
     reg [31:0] instruction_memory [0:1023];  // Adjust size as needed
     initial begin
         $readmemh("/localhome/rajneshj/USRA/ABACUS/HDL/tests/instructions.txt", instruction_memory);
     end
+
 
     /* Instruction Profiler Test */ 
 
@@ -100,7 +100,7 @@ module tb_abacus_top;
         $display("LOAD_WORD_COUNT: %h", dut.load_word_counter_reg);
         $display("STORE_WORD_COUNT: %h", dut.store_word_counter_reg);
         $display("ADDITION_COUNT: %h", dut.addition_counter_reg);
-        $display("SUBTRACTION COUNT: %h", dut.subtraction_counter_reg);
+        $display("SUBTRACTION_COUNT: %h", dut.subtraction_counter_reg);
         $display("LOGICAL_BITWISE_COUNT: %h", dut.logical_bitwise_counter_reg);
         $display("SHIFT_BITWISE_COUNT: %h", dut.shift_bitwise_counter_reg);
         $display("COMPARISON_COUNT: %h", dut.comparison_counter_reg);
@@ -109,16 +109,16 @@ module tb_abacus_top;
         $display("SYSTEM_PRIVILEGE_COUNT: %h", dut.system_privilege_counter_reg);
         $display("ATOMIC_COUNT: %h", dut.atomic_counter_reg);
     
-        // Assert values of internal registers bypassing having to read them out via bus logic
+        // Assert values of internal registers
         assert(dut.load_word_counter_reg == 32'd7) else $fatal("Assertion failed for LOAD_WORD_COUNT");
         assert(dut.store_word_counter_reg == 32'd3) else $fatal("Assertion failed for STORE_WORD_COUNT");
         assert(dut.addition_counter_reg == 32'd12) else $fatal("Assertion failed for ADD_COUNTER_COUNT");
-        assert(dut.subtraction_counter_reg == 32'd2) else $fatal("Assertion failed for SUBCTRACTION_COUNTER");
+        assert(dut.subtraction_counter_reg == 32'd2) else $fatal("Assertion failed for SUBTRACTION_COUNTER");
         assert(dut.logical_bitwise_counter_reg == 32'd6) else $fatal("Assertion failed for LOGICAL_BITWISE_COUNT");
-        assert(dut.shift_bitwise_counter_reg == 32'd6) else $fatal("Assertion failed for BITWISE_SHIFT_COUNT");
+        assert(dut.shift_bitwise_counter_reg == 32'd6) else $fatal("Assertion failed for SHIFT_BITWISE_COUNT");
         assert(dut.comparison_counter_reg == 32'd8) else $fatal("Assertion failed for COMPARISON_COUNT");
         assert(dut.branch_counter_reg == 32'd6) else $fatal("Assertion failed for BRANCH_COUNT");
-        assert(dut.jump_counter_reg == 32'd0) else $fatal("Assertion failed for CONTROL_TRANSFER_COUNT");
+        assert(dut.jump_counter_reg == 32'd0) else $fatal("Assertion failed for JUMP_COUNT");
         assert(dut.system_privilege_counter_reg == 32'd5) else $fatal("Assertion failed for SYSTEM_PRIVILEGE_COUNT");
         assert(dut.atomic_counter_reg == 32'd7) else $fatal("Assertion failed for ATOMIC_COUNT");
 
@@ -141,13 +141,13 @@ module tb_abacus_top;
 
         assert(dut.load_word_counter_reg == 32'd0) else $fatal("Assertion failed for LOAD_WORD_COUNT");
         assert(dut.store_word_counter_reg == 32'd0) else $fatal("Assertion failed for STORE_WORD_COUNT");
-        assert(dut.addition_counter_reg == 32'd0 else $fatal("Assertion failed for ADD_COUNTER_COUNT");
-        assert(dut.subtraction_counter_reg == 32'd0) else $fatal("Assertion failed for SUBCTRACTION_COUNTER");
+        assert(dut.addition_counter_reg == 32'd0) else $fatal("Assertion failed for ADD_COUNTER_COUNT");
+        assert(dut.subtraction_counter_reg == 32'd0) else $fatal("Assertion failed for SUBTRACTION_COUNTER");
         assert(dut.logical_bitwise_counter_reg == 32'd0) else $fatal("Assertion failed for LOGICAL_BITWISE_COUNT");
-        assert(dut.shift_bitwise_counter_reg == 32'd0) else $fatal("Assertion failed for BITWISE_SHIFT_COUNT");
+        assert(dut.shift_bitwise_counter_reg == 32'd0) else $fatal("Assertion failed for SHIFT_BITWISE_COUNT");
         assert(dut.comparison_counter_reg == 32'd0) else $fatal("Assertion failed for COMPARISON_COUNT");
         assert(dut.branch_counter_reg == 32'd0) else $fatal("Assertion failed for BRANCH_COUNT");
-        assert(dut.jump_counter_reg == 32'd0) else $fatal("Assertion failed for CONTROL_TRANSFER_COUNT");
+        assert(dut.jump_counter_reg == 32'd0) else $fatal("Assertion failed for JUMP_COUNT");
         assert(dut.system_privilege_counter_reg == 32'd0) else $fatal("Assertion failed for SYSTEM_PRIVILEGE_COUNT");
         assert(dut.atomic_counter_reg == 32'd0) else $fatal("Assertion failed for ATOMIC_COUNT");
     end
@@ -175,22 +175,79 @@ module tb_abacus_top;
         wb_adr <= 0;
         wb_dat_i <= 0;
 
+        // Test cache requests, hits, misses, and line fill latency
         abacus_icache_request <= 1;
-        #50 // Should only register as a single icache request count
+        #50 // Should register as a single icache request count
 
         abacus_icache_request <= 0;
         abacus_icache_miss <= 1;
         abacus_icache_line_fill_in_progress <= 1;
-        #50 // Should only register as asingle icache miss, and the count for line fill in progress should be 50/10 = 5 clock cycles of latency
-
+        #50 // Should register as a single icache miss, and the count for line fill in progress should be 50/10 = 5 clock cycles of latency
 
         abacus_icache_request <= 0;
         abacus_icache_miss <= 0;
         abacus_icache_line_fill_in_progress <= 0;
 
-        assert(dut.abacus_icache_request == 32'd1) else $fatal("Assertion failed for ICACHE_REQUEST");
-        assert(dut.abacus_icache_miss == 32'd1) else $fatal("Assertion failed for ICACHE_MISS");
-        $finish    
+        abacus_dcache_request <= 1;
+        #30 // Should register
+        
+        abacus_dcache_request <= 1;
+        #30 // Should register as a single dcache request count
+
+        abacus_dcache_request <= 0;
+        abacus_dcache_hit <= 1;
+        abacus_dcache_line_fill_in_progress <= 1;
+        #40 // Should register as a single dcache hit, and the count for line fill in progress should be 40/10 = 4 clock cycles of latency
+
+        abacus_dcache_request <= 0;
+        abacus_dcache_hit <= 0;
+        abacus_dcache_line_fill_in_progress <= 0;
+
+        // Print the values of the cache profile unit registers
+        $display("Cache Profile Unit Registers:");
+        $display("ICACHE_REQUEST_COUNTER: %h", dut.icache_request_counter_reg);
+        $display("ICACHE_HIT_COUNTER: %h", dut.icache_hit_counter_reg);
+        $display("ICACHE_MISS_COUNTER: %h", dut.icache_miss_counter_reg);
+        $display("ICACHE_LINE_FILL_LATENCY_COUNTER: %h", dut.icache_line_fill_latency_counter_reg);
+        $display("DCACHE_REQUEST_COUNTER: %h", dut.dcache_request_counter_reg);
+        $display("DCACHE_HIT_COUNTER: %h", dut.dcache_hit_counter_reg);
+        $display("DCACHE_MISS_COUNTER: %h", dut.dcache_miss_counter_reg);
+        $display("DCACHE_LINE_FILL_LATENCY_COUNTER: %h", dut.dcache_line_fill_latency_counter_reg);
+
+        // Verify the values with assert statements (replace with expected values)
+        assert(dut.icache_request_counter_reg == 32'd1) else $fatal("Assertion failed for ICACHE_REQUEST_COUNTER");
+        assert(dut.icache_miss_counter_reg == 32'd1) else $fatal("Assertion failed for ICACHE_MISS_COUNTER");
+        assert(dut.icache_line_fill_latency_counter_reg == 32'd5) else $fatal("Assertion failed for ICACHE_LINE_FILL_LATENCY_COUNTER");
+        assert(dut.dcache_request_counter_reg == 32'd1) else $fatal("Assertion failed for DCACHE_REQUEST_COUNTER");
+        assert(dut.dcache_hit_counter_reg == 32'd1) else $fatal("Assertion failed for DCACHE_HIT_COUNTER");
+        assert(dut.dcache_line_fill_latency_counter_reg == 32'd4) else $fatal("Assertion failed for DCACHE_LINE_FILL_LATENCY_COUNTER");
+
+        // Disable the profiling unit
+        wb_cyc <= 1;
+        wb_stb <= 1;
+        wb_we <= 1;
+        
+        wb_adr <= 32'hf0030008;
+        wb_dat_i <= 0;
+        
+        #20 
+
+        wb_cyc <= 0;
+        wb_stb <= 0;
+        wb_we <= 0;
+        
+        wb_adr <= 0;
+        wb_dat_i <= 0;
+
+        // Ensure counters are reset
+        assert(dut.icache_request_counter_reg == 32'd0) else $fatal("Assertion failed for ICACHE_REQUEST_COUNTER");
+        assert(dut.icache_miss_counter_reg == 32'd0) else $fatal("Assertion failed for ICACHE_MISS_COUNTER");
+        assert(dut.icache_line_fill_latency_counter_reg == 32'd0) else $fatal("Assertion failed for ICACHE_LINE_FILL_LATENCY_COUNTER");
+        assert(dut.dcache_request_counter_reg == 32'd0) else $fatal("Assertion failed for DCACHE_REQUEST_COUNTER");
+        assert(dut.dcache_hit_counter_reg == 32'd0) else $fatal("Assertion failed for DCACHE_HIT_COUNTER");
+        assert(dut.dcache_line_fill_latency_counter_reg == 32'd0) else $fatal("Assertion failed for DCACHE_LINE_FILL_LATENCY_COUNTER");
+
+        $finish;
     end
 
 endmodule

@@ -232,6 +232,7 @@ generate if (WITH_AXI) begin : gen_axi_if
 
 end endgenerate
 
+
 generate if (~WITH_AXI) begin : gen_wishbone_if 
     // Wishbone Acknowledgement and Data Handling
     always_ff @(posedge clk or posedge rst) begin
@@ -325,6 +326,8 @@ generate if (INCLUDE_CACHE_PROFILER) begin : gen_cache_profiler_if
         .dcache_request(abacus_dcache_request),
         .icache_miss(abacus_icache_miss),
         .dcache_hit(abacus_dcache_hit),
+        .icache_line_fill_in_progress(abacus_icache_line_fill_in_progress),
+        .dcache_line_fill_in_progress(abacus_dcache_line_fill_in_progress),
         .icache_request_counter(icache_request_counter_reg),
         .icache_hit_counter(icache_hit_counter_reg),
         .icache_miss_counter(icache_miss_counter_reg),

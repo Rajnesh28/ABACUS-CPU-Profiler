@@ -44,7 +44,8 @@ typedef enum logic [1:0] {
 state_t icache_miss_state, icache_request_state;
 state_t dcache_hit_state, dcache_request_state;
 
-always_ff @(posedge clk or posedge rst) begin
+
+always_ff @(posedge clk) begin
     if (rst | ~enable) begin
         icache_hit_counter_reg <= 32'h0;
         dcache_miss_counter_reg <= 32'h0;
@@ -54,10 +55,10 @@ always_ff @(posedge clk or posedge rst) begin
     end
 end
 
-always_ff @(posedge clk or posedge rst) begin
-    if (rst | ~enable) begin
-        icache_miss_state <= IDLE;
-        icache_miss_counter_reg <= 32'h0;
+always_ff @(posedge clk) begin
+    if (rst || ~enable) begin
+        icache_miss_state <= IDLE;    
+        icache_miss_counter_reg <= 32'h0;    
     end else begin
         case (icache_miss_state)
             IDLE: begin
@@ -75,10 +76,10 @@ always_ff @(posedge clk or posedge rst) begin
     end
 end
 
-always_ff @(posedge clk or posedge rst) begin
+always_ff @(posedge clk) begin
     if (rst | ~enable) begin
         icache_request_state <= IDLE;
-        icache_request_counter_reg <= 32'h0;
+        icache_request_counter_reg <= 32'h0;    
     end else begin
         case (icache_request_state)
             IDLE: begin
@@ -96,11 +97,10 @@ always_ff @(posedge clk or posedge rst) begin
     end
 end
 
-always_ff @(posedge clk or posedge rst) begin
+always_ff @(posedge clk) begin
     if (rst | ~enable) begin
-        dcache_hit_state <= IDLE;
-        dcache_hit_counter_reg <= 32'h0;
-    end else begin
+        dcache_hit_state <= RESET;
+    end else if (~rst & enable) begin
         case (dcache_hit_state)
             IDLE: begin
                 if (dcache_hit) begin
@@ -117,7 +117,7 @@ always_ff @(posedge clk or posedge rst) begin
     end
 end
 
-always_ff @(posedge clk or posedge rst) begin
+always_ff @(posedge clk) begin
     if (rst | ~enable) begin
         dcache_request_state <= IDLE;
         dcache_request_counter_reg <= 32'h0;
@@ -138,7 +138,7 @@ always_ff @(posedge clk or posedge rst) begin
     end
 end
 
-always_ff @(posedge clk or posedge rst) begin
+always_ff @(posedge clk) begin
     if (rst | ~enable) begin
         icache_line_fill_latency_counter_reg <= 32'h0;        
     end else begin
@@ -148,7 +148,7 @@ always_ff @(posedge clk or posedge rst) begin
     end
 end
 
-always_ff @(posedge clk or posedge rst) begin
+always_ff @(posedge clk) begin
     if (rst | ~enable) begin
         dcache_line_fill_latency_counter_reg <= 32'h0;        
     end else begin
