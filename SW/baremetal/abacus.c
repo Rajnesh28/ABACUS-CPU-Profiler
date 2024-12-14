@@ -98,3 +98,4 @@ int disable_dcache_profiling(void) {
     *(CACHE_PROFILE_UNIT_ENABLE) = (unsigned int) 0x0;
     return (*(CACHE_PROFILE_UNIT_ENABLE) == 0x0);
 }
+
