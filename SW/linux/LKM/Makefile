@@ -1,10 +1,22 @@
-obj-m += abacus.o
+# The kernel source directory
+KERNELDIR ?= /localhome/rajneshj/USRA/buildroot/output/build/lkm_linux-5.18
 
-KDIR := /localhome/rajneshj/USRA/linux-5.18
-# BUILD_DIR := /localhome/rajneshj/USRA/ABACUS/LKM/build
+# Buildroot toolchain settings
+ARCH := riscv
+CROSS_COMPILE := /localhome/rajneshj/USRA/buildroot/output/host/bin/riscv32-buildroot-linux-gnu-
+CC := $(CROSS_COMPILE)gcc
 
+# Module name (hello.ko)
+obj-m := hello.o
+
+# Add custom CFLAGS for module compilation
+CFLAGS_MODULE := -fno-asynchronous-unwind-tables -fno-unwind-tables
+
+# Default target to compile the module
 all:
-	make -C $(KDIR) M=$(PWD) CROSS_COMPILE=riscv32-unknown-linux-gnu- ARCH=riscv modules
+	$(MAKE) -C $(KERNELDIR) M=$(PWD) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) CC=$(CC) CFLAGS_MODULE="$(CFLAGS_MODULE)" modules
 
+# Clean target to remove generated files
 clean:
-	make -C $(KDIR) M=$(pwd) CROSS_COMPILE=riscv32-unknown-linux-gnu- ARCH=riscv clean
+	$(MAKE) -C $(KERNELDIR) M=$(PWD) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) CC=$(CC) clean
+

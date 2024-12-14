@@ -1,11 +1,11 @@
-BUILD_DIR?=/localhome/rajneshj/USRA/litex/litex/soc/software/abacus/build/sim
+BUILD_DIR?=/localhome/rajneshj/USRA/litex/litex/soc/software/demo/build/sim
 
 include $(BUILD_DIR)/software/include/generated/variables.mak
 include /localhome/rajneshj/USRA/litex/litex/soc/software/common.mak
 
 OBJECTS   = abacus.o crt0.o main.o
 
-all: demo.bin
+all: abacus.bin
 
 
 %.bin: %.elf
@@ -16,7 +16,7 @@ endif
 
 vpath %.a $(PACKAGES:%=../%)
 
-demo.elf: $(OBJECTS)
+abacus.elf: $(OBJECTS)
 	$(CC) $(LDFLAGS) -T linker.ld -N -o $@ \
 		$(OBJECTS) \
 		$(PACKAGES:%=-L$(BUILD_DIR)/software/%) \
@@ -32,8 +32,6 @@ endif
 # pull in dependency info for *existing* .o files
 -include $(OBJECTS:.o=.d)
 
-donut.o: CFLAGS   += -w
-
 VPATH = $(BIOS_DIRECTORY):$(BIOS_DIRECTORY)/cmds:$(CPU_DIRECTORY)
 
 
@@ -47,6 +45,6 @@ VPATH = $(BIOS_DIRECTORY):$(BIOS_DIRECTORY)/cmds:$(CPU_DIRECTORY)
 	$(assemble)
 
 clean:
-	$(RM) $(OBJECTS) demo.elf demo.bin .*~ *~
+	$(RM) $(OBJECTS) abacus.elf abacus.bin .*~ *~
 
 .PHONY: all clean
