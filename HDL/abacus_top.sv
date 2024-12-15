@@ -3,7 +3,8 @@ module abacus_top
     parameter logic WITH_AXI                     = 1'b0,
     parameter [31:0] ABACUS_BASE_ADDR            = 32'hf0030000,
     parameter logic INCLUDE_INSTRUCTION_PROFILER = 1'b1,
-    parameter logic INCLUDE_CACHE_PROFILER       = 1'b1
+    parameter logic INCLUDE_CACHE_PROFILER       = 1'b1,
+    parameter unsigned CLOCK_FREQ                = 1000000 // 1MHz
 )
 (
 
