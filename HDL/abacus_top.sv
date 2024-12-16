@@ -68,6 +68,7 @@ module abacus_top
 // All addresses must be 4-byte (dword) aligned
 localparam logic [31:0] INSTRUCTION_PROFILE_UNIT_ENABLE_ADDR  = ABACUS_BASE_ADDR + 16'h0004;
 localparam logic [31:0] CACHE_PROFILE_UNIT_ENABLE_ADDR       = ABACUS_BASE_ADDR + 16'h0008;
+localparam logic [31:0] STALL_UNIT_ENABLE_ADDR       = ABACUS_BASE_ADDR + 16'h000C;
 
 localparam logic [31:0] INSTRUCTION_PROFILE_UNIT_BASE_ADDR   = ABACUS_BASE_ADDR + 16'h0100;
 
@@ -119,6 +120,28 @@ reg [31:0] dcache_hit_counter_reg;
 reg [31:0] dcache_miss_counter_reg;
 reg [31:0] dcache_line_fill_latency_counter_reg;
 
+localparam logic [31:0] STALL_UNIT_BASE_ADDR = ABACUS_BASE_ADDR + 16'h0300;
+
+localparam logic [31:0] BRANCH_MISPREDICTION_COUNTER_ADDR 	= STALL_UNIT_BASE_ADDR + 16'h0000;
+localparam logic [31:0] RAS_MISPREDICTION_COUNTER_ADDR 		= STALL_UNIT_BASE_ADDR + 16'h0004;
+localparam logic [31:0] ISSUE_NO_INSTRUCTION_STAT_COUNTER_ADDR 	= STALL_UNIT_BASE_ADDR + 16'h0008;
+localparam logic [31:0] ISSUE_NO_ID_STAT_COUNTER_ADDR 		= STALL_UNIT_BASE_ADDR + 16'h000C;
+localparam logic [31:0] ISSUE_FLUSH_STAT_COUNTER_ADDR 		= STALL_UNIT_BASE_ADDR + 16'h0010;
+localparam logic [31:0] ISSUE_UNIT_BUSY_STAT_COUNTER_ADDR 	= STALL_UNIT_BASE_ADDR + 16'h0014;
+localparam logic [31:0] ISSUE_OPERANDS_NOT_READY_STAT_COUNTER_ADDR 	= STALL_UNIT_BASE_ADDR + 16'h0018;
+localparam logic [31:0] ISSUE_HOLD_STAT_COUNTER_ADDR 		= STALL_UNIT_BASE_ADDR + 16'h001C;
+localparam logic [31:0] ISSUE_MULTI_SOURCE_ADDR 			= STALL_UNIT_BASE_ADDR + 16'h0020;
+
+reg [31:0] stall_unit_enable_reg;
+reg [31:0] branch_misprediction_counter_reg;
+reg [31:0] ras_misprediction_counter_reg;
+reg [31:0] issue_no_instruction_stat_counter_reg;
+reg [31:0] issue_no_id_stat_counter_reg;
+reg [31:0] issue_flush_stat_counter_reg;
+reg [31:0] issue_unit_busy_stat_counter_reg;
+reg [31:0] issue_operands_not_ready_stat_counter_reg;
+reg [31:0] issue_hold_stat_counter_reg;
+reg [31:0] issue_multi_source_counter_reg;
 
 generate if (WITH_AXI) begin : gen_axi_if
 
@@ -267,9 +290,16 @@ generate if (WITH_AXI) begin : gen_axi_if
 	                cache_profile_unit_enable_reg[(byte_index*8) +: 8] <= S_AXI_WDATA[(byte_index*8) +: 8];
 	              end  
 
+				  STALL_UNIT_ENABLE_ADDR:
+				  for ( byte_index = 0; byte_index <= (C_S_AXI_DATA_WIDTH/8)-1; byte_index = byte_index+1 )
+					if ( S_AXI_WSTRB[byte_index] == 1 ) begin
+					  stall_unit_enable_reg[(byte_index*8) +: 8] <= S_AXI_WDATA[(byte_index*8) +: 8];
+					end  
+
 	          default : begin
                     instruction_profile_unit_enable_reg <= instruction_profile_unit_enable_reg;
                     cache_profile_unit_enable_reg <= cache_profile_unit_enable_reg;
+					stall_unit_enable_reg <= stall_unit_enable_reg;
                     end
 	        endcase
 	      end
@@ -380,6 +410,7 @@ generate if (WITH_AXI) begin : gen_axi_if
 	      case ( axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] )
             INSTRUCTION_PROFILE_UNIT_ENABLE_ADDR   : reg_data_out <= instruction_profile_unit_enable_reg;
             CACHE_PROFILE_UNIT_ENABLE_ADDR   : reg_data_out <= cache_profile_unit_enable_reg;
+			STALL_UNIT_ENABLE_ADDR	: reg_data_out <= stall_unit_enable_reg;
 
             LOAD_WORD_COUNTER_ADDR   : reg_data_out <= load_word_counter_reg;
             STORE_WORD_COUNTER_ADDR   : reg_data_out <= store_word_counter_reg;
@@ -401,6 +432,16 @@ generate if (WITH_AXI) begin : gen_axi_if
             DCACHE_HIT_COUNTER_ADDR   : reg_data_out <= dcache_hit_counter_reg;
             DCACHE_MISS_COUNTER_ADDR   : reg_data_out <= dcache_miss_counter_reg;
             DCACHE_LINE_FILL_LATENCY_ADDR   : reg_data_out <= dcache_line_fill_latency_counter_reg;
+
+			BRANCH_MISPREDICTION_COUNTER_ADDR	: reg_data_out <= branch_misprediction_counter_reg;
+			RAS_MISPREDICTION_COUNTER_ADDR	: reg_data_out <= ras_misprediction_counter_reg;
+			ISSUE_NO_INSTRUCTION_STAT_COUNTER_ADDR	: reg_data_out <= issue_no_instruction_stat_counter_reg;
+			ISSUE_NO_ID_STAT_COUNTER_ADDR	: reg_data_out <= issue_no_id_stat_counter_reg;
+			ISSUE_FLUSH_STAT_COUNTER_ADDR	: reg_data_out <= issue_flush_stat_counter_reg;
+			ISSUE_UNIT_BUSY_STAT_COUNTER_ADDR	: reg_data_out <= issue_unit_busy_stat_counter_reg;
+			ISSUE_OPERANDS_NOT_READY_STAT_COUNTER_ADDR	: reg_data_out <= issue_operands_not_ready_stat_counter_reg;
+			ISSUE_HOLD_STAT_COUNTER_ADDR	: reg_data_out <= issue_hold_stat_counter_reg;
+			ISSUE_MULTI_SOURCE_ADDR 	: reg_data_out <= issue_multi_source_counter_reg;
 
 	        default : reg_data_out <= 0;
 	      endcase
@@ -436,6 +477,7 @@ generate if (~WITH_AXI) begin : gen_wishbone_if
 
             instruction_profile_unit_enable_reg <= 32'h0;
             cache_profile_unit_enable_reg <= 32'h0;
+			stall_unit_enable_reg <= 32'h0;
 
         end else begin
             // When a valid transaction is ongoing and acknowledged
@@ -446,6 +488,7 @@ generate if (~WITH_AXI) begin : gen_wishbone_if
                 case (wb_adr[31:0])
                     INSTRUCTION_PROFILE_UNIT_ENABLE_ADDR: instruction_profile_unit_enable_reg <= wb_dat_i;
                     CACHE_PROFILE_UNIT_ENABLE_ADDR: cache_profile_unit_enable_reg <= wb_dat_i;
+					STALL_UNIT_ENABLE_ADDR: stall_unit_enable_reg <= wb_dat_i;
                 endcase
             end
         end
@@ -460,7 +503,8 @@ generate if (~WITH_AXI) begin : gen_wishbone_if
             case (wb_adr[31:0])
                 INSTRUCTION_PROFILE_UNIT_ENABLE_ADDR: wb_dat_o <= instruction_profile_unit_enable_reg;
                 CACHE_PROFILE_UNIT_ENABLE_ADDR: wb_dat_o <= cache_profile_unit_enable_reg;
-                LOAD_WORD_COUNTER_ADDR: wb_dat_o <= load_word_counter_reg;
+                STALL_UNIT_ENABLE_ADDR: wb_dat_o <= stall_unit_enable_reg;
+				LOAD_WORD_COUNTER_ADDR: wb_dat_o <= load_word_counter_reg;
                 STORE_WORD_COUNTER_ADDR: wb_dat_o <= store_word_counter_reg;
                 ADDITION_COUNTER_ADDR: wb_dat_o <= addition_counter_reg;
                 SUBTRACTION_COUNTER_ADDR: wb_dat_o <= subtraction_counter_reg;
@@ -479,6 +523,15 @@ generate if (~WITH_AXI) begin : gen_wishbone_if
                 DCACHE_HIT_COUNTER_ADDR: wb_dat_o <= dcache_hit_counter_reg;
                 DCACHE_MISS_COUNTER_ADDR: wb_dat_o <= dcache_miss_counter_reg;
                 DCACHE_LINE_FILL_LATENCY_ADDR: wb_dat_o <= dcache_line_fill_latency_counter_reg;
+				BRANCH_MISPREDICTION_COUNTER_ADDR: wb_dat_o <= branch_misprediction_counter_reg;
+				RAS_MISPREDICTION_COUNTER_ADDR: wb_dat_o <= ras_misprediction_counter_reg;
+				ISSUE_NO_INSTRUCTION_STAT_COUNTER_ADDR: wb_dat_o <= issue_no_instruction_stat_counter_reg;
+				ISSUE_NO_ID_STAT_COUNTER_ADDR: wb_dat_o <= issue_no_id_stat_counter_reg;
+				ISSUE_FLUSH_STAT_COUNTER_ADDR: wb_dat_o <= issue_flush_stat_counter_reg;
+				ISSUE_UNIT_BUSY_STAT_COUNTER_ADDR: wb_dat_o <= issue_unit_busy_stat_counter_reg;
+				ISSUE_OPERANDS_NOT_READY_STAT_COUNTER_ADDR: wb_dat_o <= issue_operands_not_ready_stat_counter_reg;
+				ISSUE_HOLD_STAT_COUNTER_ADDR: wb_dat_o <= issue_hold_stat_counter_reg;
+				ISSUE_MULTI_SOURCE_ADDR: wb_dat_o <= issue_multi_source_counter_reg;
                 default: wb_dat_o = 32'h0;   // Invalid address, return zero
             endcase
         end
@@ -548,6 +601,17 @@ generate if (INCLUDE_STALL_UNIT) begin : gen_stall_unit_if
 		.issue_unit_busy_stat(abacus_issue_unit_busy_stat),
 		.issue_operands_not_ready_stat(abacus_issue_operands_not_ready_stat),
 		.issue_hold_stat(abacus_issue_hold_stat),
-		.issue_multi_source_stat(abacus_issue_multi_source_stat)
-	)
+		.issue_multi_source_stat(abacus_issue_multi_source_stat),
+		.branch_misprediction_counter(branch_misprediction_counter_reg),
+		.ras_misprediction_counter(ras_misprediction_counter_reg),
+		.issue_no_instruction_stat_counter(issue_no_instruction_stat_counter_reg),
+		.issue_no_id_stat_counter(issue_no_id_stat_counter_reg),
+		.issue_flush_stat_counter(issue_flush_stat_counter_reg),
+		.issue_unit_busy_stat_counter(issue_unit_busy_stat_counter_reg),
+		.issue_operands_not_ready_stat_counter(issue_operands_not_ready_stat_counter_reg),
+		.issue_hold_stat_counter(issue_hold_stat_counter_reg),
+		.issue_multi_source_counter(issue_multi_source_counter_reg)
+	);
+end endgenerate
+
 endmodule

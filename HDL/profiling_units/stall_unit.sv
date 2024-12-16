@@ -1,6 +1,6 @@
-module stall_unit #
-parameter unsigned CLOCK_FREQ = 1000000 // 1MHz 
-) (
+module stall_unit # 
+(parameter unsigned CLOCK_FREQ = 1000000) // 1MHz 
+(
     input logic clk,
     input logic rst,
     input logic enable,
