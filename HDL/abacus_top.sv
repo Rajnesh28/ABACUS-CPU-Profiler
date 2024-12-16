@@ -6,19 +6,30 @@ module abacus_top
     parameter [31:0] ABACUS_BASE_ADDR            = 32'hf0030000,
     parameter logic INCLUDE_INSTRUCTION_PROFILER = 1'b1,
     parameter logic INCLUDE_CACHE_PROFILER       = 1'b1,
+	parameter logic INCLUDE_STALL_UNIT			 = 1'b1,
     parameter unsigned CLOCK_FREQ                = 1000000 // 1MHz
 )
 (
 
     input [31:0] abacus_instruction,
     input abacus_instruction_issued,
-
+	
     input logic abacus_icache_request,
     input logic abacus_dcache_request,
     input logic abacus_icache_miss,
     input logic abacus_dcache_hit,
     input logic abacus_icache_line_fill_in_progress,
     input logic abacus_dcache_line_fill_in_progress,
+
+	input logic abacus_branch_misprediction,
+	input logic abacus_ras_misprediction,
+	input logic abacus_issue_no_instruction_stat,
+	input logic abacus_issue_no_id_stat,
+	input logic abacus_issue_flush_stat,
+	input logic abacus_unit_busy_stat,
+	input logic abacus_issue_operands_not_ready_stat,
+	input logic abacus_issue_hold_stat,
+	input logic abacus_issue_multi_source_stat,
 
     // AXI-Lite Interface from Vivado IP Generator
     input wire  S_AXI_ACLK,
@@ -523,4 +534,20 @@ generate if (INCLUDE_CACHE_PROFILER) begin : gen_cache_profiler_if
     );
 end endgenerate
 
+generate if (INCLUDE_STALL_UNIT) begin : gen_stall_unit_if
+	stall_unit # ()
+	stall_unit_block (
+		.clk(clk),
+		.rst(rst),
+		.enable(stall_unit_enable_reg[0]),
+		.branch_misprediction(abacus_branch_misprediction),
+		.ras_misprediction(abacus_ras_misprediction),
+		.issue_no_instruction_stat(abacus_issue_no_instruction_stat),
+		.issue_no_id_stat(abacus_issue_no_id_stat),
+		.issue_flush_stat(abacus_issue_flush_stat),
+		.issue_unit_busy_stat(abacus_issue_unit_busy_stat),
+		.issue_operands_not_ready_stat(abacus_issue_operands_not_ready_stat),
+		.issue_hold_stat(abacus_issue_hold_stat),
+		.issue_multi_source_stat(abacus_issue_multi_source_stat)
+	)
 endmodule

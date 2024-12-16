@@ -1,5 +1,5 @@
 module cache_profiler #(
-    parameter unsigned CLOCK_FREQ                = 1000000 // 1MHz 
+    parameter unsigned CLOCK_FREQ = 1000000 // 1MHz 
 )
 (
     input logic clk,
@@ -130,18 +130,6 @@ always_ff @(posedge clk or posedge rst) begin
             i <= i + 1;
         end
     end
-end
-
-always_comb begin
-    icache_request_counter <= icache_request_counter_reg;
-    icache_hit_counter <= icache_hit_counter_reg;
-    icache_miss_counter <= icache_miss_counter_reg;
-    icache_line_fill_latency_counter <= icache_line_fill_latency_counter_reg;
-
-    dcache_request_counter <= dcache_request_counter_reg;
-    dcache_hit_counter <= dcache_hit_counter_reg;
-    dcache_miss_counter <= dcache_miss_counter_reg;
-    dcache_line_fill_latency_counter <= dcache_line_fill_latency_counter_reg;
 end
 
 endmodule
