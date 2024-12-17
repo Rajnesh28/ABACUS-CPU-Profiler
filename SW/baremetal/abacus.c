@@ -118,8 +118,8 @@ int enable_stall_unit(void) {
 }
 
 int disable_stall_unit(void) {
-	*(STALL_UNIT_ENABLE) = (unsigned int) 0x1;
-	return (*(STALL_UNIT_ENABLE) == 0x1);
+	*(STALL_UNIT_ENABLE) = (unsigned int) 0x0;
+	return (*(STALL_UNIT_ENABLE) == 0x0);
 }
 
 void stall_unit_profile(void) {
