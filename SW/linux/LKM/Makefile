@@ -6,8 +6,8 @@ ARCH := riscv
 CROSS_COMPILE := /localhome/rajneshj/USRA/buildroot/output/host/bin/riscv32-buildroot-linux-gnu-
 CC := $(CROSS_COMPILE)gcc
 
-# Module name (hello.ko)
-obj-m := hello.o
+# Module name (abacus.ko)
+obj-m := abacus.o
 
 # Add custom CFLAGS for module compilation
 CFLAGS_MODULE := -fno-asynchronous-unwind-tables -fno-unwind-tables
