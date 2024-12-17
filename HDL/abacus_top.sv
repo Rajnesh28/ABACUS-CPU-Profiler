@@ -26,7 +26,7 @@ module abacus_top
 	input logic abacus_issue_no_instruction_stat,
 	input logic abacus_issue_no_id_stat,
 	input logic abacus_issue_flush_stat,
-	input logic abacus_unit_busy_stat,
+	input logic abacus_issue_unit_busy_stat,
 	input logic abacus_issue_operands_not_ready_stat,
 	input logic abacus_issue_hold_stat,
 	input logic abacus_issue_multi_source_stat,
@@ -130,7 +130,7 @@ localparam logic [31:0] ISSUE_FLUSH_STAT_COUNTER_ADDR 		= STALL_UNIT_BASE_ADDR +
 localparam logic [31:0] ISSUE_UNIT_BUSY_STAT_COUNTER_ADDR 	= STALL_UNIT_BASE_ADDR + 16'h0014;
 localparam logic [31:0] ISSUE_OPERANDS_NOT_READY_STAT_COUNTER_ADDR 	= STALL_UNIT_BASE_ADDR + 16'h0018;
 localparam logic [31:0] ISSUE_HOLD_STAT_COUNTER_ADDR 		= STALL_UNIT_BASE_ADDR + 16'h001C;
-localparam logic [31:0] ISSUE_MULTI_SOURCE_ADDR 			= STALL_UNIT_BASE_ADDR + 16'h0020;
+localparam logic [31:0] ISSUE_MULTI_SOURCE_STAT_ADDR 		= STALL_UNIT_BASE_ADDR + 16'h0020;
 
 reg [31:0] stall_unit_enable_reg;
 reg [31:0] branch_misprediction_counter_reg;
@@ -141,7 +141,7 @@ reg [31:0] issue_flush_stat_counter_reg;
 reg [31:0] issue_unit_busy_stat_counter_reg;
 reg [31:0] issue_operands_not_ready_stat_counter_reg;
 reg [31:0] issue_hold_stat_counter_reg;
-reg [31:0] issue_multi_source_counter_reg;
+reg [31:0] issue_multi_source_stat_counter_reg;
 
 generate if (WITH_AXI) begin : gen_axi_if
 
@@ -441,7 +441,7 @@ generate if (WITH_AXI) begin : gen_axi_if
 			ISSUE_UNIT_BUSY_STAT_COUNTER_ADDR	: reg_data_out <= issue_unit_busy_stat_counter_reg;
 			ISSUE_OPERANDS_NOT_READY_STAT_COUNTER_ADDR	: reg_data_out <= issue_operands_not_ready_stat_counter_reg;
 			ISSUE_HOLD_STAT_COUNTER_ADDR	: reg_data_out <= issue_hold_stat_counter_reg;
-			ISSUE_MULTI_SOURCE_ADDR 	: reg_data_out <= issue_multi_source_counter_reg;
+			ISSUE_MULTI_SOURCE_STAT_ADDR 	: reg_data_out <= issue_multi_source_stat_counter_reg;
 
 	        default : reg_data_out <= 0;
 	      endcase
@@ -531,7 +531,7 @@ generate if (~WITH_AXI) begin : gen_wishbone_if
 				ISSUE_UNIT_BUSY_STAT_COUNTER_ADDR: wb_dat_o <= issue_unit_busy_stat_counter_reg;
 				ISSUE_OPERANDS_NOT_READY_STAT_COUNTER_ADDR: wb_dat_o <= issue_operands_not_ready_stat_counter_reg;
 				ISSUE_HOLD_STAT_COUNTER_ADDR: wb_dat_o <= issue_hold_stat_counter_reg;
-				ISSUE_MULTI_SOURCE_ADDR: wb_dat_o <= issue_multi_source_counter_reg;
+				ISSUE_MULTI_SOURCE_STAT_ADDR: wb_dat_o <= issue_multi_source_stat_counter_reg;
                 default: wb_dat_o = 32'h0;   // Invalid address, return zero
             endcase
         end
@@ -610,7 +610,7 @@ generate if (INCLUDE_STALL_UNIT) begin : gen_stall_unit_if
 		.issue_unit_busy_stat_counter(issue_unit_busy_stat_counter_reg),
 		.issue_operands_not_ready_stat_counter(issue_operands_not_ready_stat_counter_reg),
 		.issue_hold_stat_counter(issue_hold_stat_counter_reg),
-		.issue_multi_source_counter(issue_multi_source_counter_reg)
+		.issue_multi_source_stat_counter(issue_multi_source_stat_counter_reg)
 	);
 end endgenerate
 

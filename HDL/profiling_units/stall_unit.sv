@@ -1,5 +1,5 @@
 module stall_unit # 
-(parameter unsigned CLOCK_FREQ = 1000000) // 1MHz 
+    (parameter unsigned CLOCK_FREQ = 1000000) // 1MHz 
 (
     input logic clk,
     input logic rst,
@@ -95,6 +95,7 @@ always_ff @(posedge clk or posedge rst) begin
         issue_multi_source_stat_prev <= 0;
 
         i <= 0; //Initialize counter
+        
     end else begin
         if (~branch_misprediction_prev && branch_misprediction) begin 
             branch_misprediction_counter_reg <= branch_misprediction_counter_reg + 1;
