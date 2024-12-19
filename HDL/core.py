@@ -124,6 +124,7 @@ class CVA5(CPU):
         platform.add_source(os.path.join(cva5_path, "/localhome/rajneshj/USRA/ABACUS/HDL/abacus_top.sv"))
         platform.add_source(os.path.join(cva5_path, "/localhome/rajneshj/USRA/ABACUS/HDL/profiling_units/instruction_profiler.sv"))
         platform.add_source(os.path.join(cva5_path, "/localhome/rajneshj/USRA/ABACUS/HDL/profiling_units/cache_profiler.sv"))
+        platform.add_source(os.path.join(cva5_path, "/localhome/rajneshj/USRA/ABACUS/HDL/profiling_units/stall_unit.sv"))
 
     def do_finalize(self):
         assert hasattr(self, "reset_address")
@@ -231,17 +232,29 @@ class CVA5(CPU):
 
         soc.bus.add_slave("clint", clintbus, region=SoCRegion(origin=self.clint_base, size=0x1_0000, cached=False))
 
+        # Instruction Profiling Unit
         abacus_instruction = Signal(32)
         abacus_instruction_issued = Signal()
 
+        # Cache Profiling Unit
         abacus_icache_request = Signal()
         abacus_icache_miss = Signal()
         abacus_icache_line_fill_in_progress = Signal()
-
         abacus_dcache_request = Signal()
         abacus_dcache_hit = Signal()
         abacus_dcache_line_fill_in_progress = Signal()
-        
+
+        # Stall Unit Profiling Unit
+        abacus_branch_misprediction = Signal()
+        abacus_ras_misprediction = Signal()
+        abacus_issue_no_instruction_stat = Signal()
+        abacus_issue_no_id_stat = Signal()
+        abacus_issue_flush_stat = Signal()
+        abacus_issue_unit_busy_stat = Signal()
+        abacus_issue_operands_not_ready_stat = Signal()
+        abacus_issue_hold_stat = Signal()
+        abacus_issue_multi_source_stat = Signal()
+
         self.cpu_params.update (
             o_abacus_instruction = abacus_instruction,
             o_abacus_instruction_issued = abacus_instruction_issued,
@@ -252,14 +265,27 @@ class CVA5(CPU):
             o_abacus_dcache_hit = abacus_dcache_hit,
 
             o_abacus_icache_line_fill_in_progress = abacus_icache_line_fill_in_progress,
-            o_abacus_dcache_line_fill_in_progress = abacus_dcache_line_fill_in_progress
+            o_abacus_dcache_line_fill_in_progress = abacus_dcache_line_fill_in_progress,
+
+            o_abacus_branch_misprediction = abacus_branch_misprediction,
+            o_abacus_ras_misprediction = abacus_ras_misprediction,
+            o_abacus_issue_no_instruction_stat = abacus_issue_no_instruction_stat,
+            o_abacus_issue_no_id_stat = abacus_issue_no_id_stat,
+            o_abacus_issue_flush_stat = abacus_issue_flush_stat,
+            o_abacus_unit_busy_stat = abacus_issue_unit_busy_stat,
+            o_abacus_issue_operands_not_ready_stat = abacus_issue_operands_not_ready_stat,
+            o_abacus_issue_hold_stat = abacus_issue_hold_stat,
+            o_abacus_issue_multi_source_stat = abacus_issue_multi_source_stat,
+
         )
         self.testbus = testbus = wishbone.Interface(data_width=32, address_width=32, addressing="byte")
         self.specials += Instance("abacus_top",
-            p_WITH_AXI         = 0x0,
+            p_WITH_AXI         = 0x0, # Use Wishbone
             p_ABACUS_BASE_ADDR = 0xf0030000,
             p_INCLUDE_INSTRUCTION_PROFILER = 0x1,
             p_INCLUDE_CACHE_PROFILER = 0x1,
+            p_INCLUDE_STALL_UNIT = 0x1,
+
             i_clk = ClockSignal("sys"),
             i_rst = ResetSignal("sys"),
             i_wb_cyc = testbus.cyc,
@@ -269,6 +295,7 @@ class CVA5(CPU):
             i_wb_dat_i = testbus.dat_w,
             o_wb_dat_o = testbus.dat_r,
             o_wb_ack = testbus.ack,
+
             i_abacus_instruction = abacus_instruction,
             i_abacus_instruction_issued = abacus_instruction_issued,
             i_abacus_icache_request = abacus_icache_request,
@@ -277,21 +304,31 @@ class CVA5(CPU):
             i_abacus_dcache_request = abacus_dcache_request,
             i_abacus_dcache_hit = abacus_dcache_hit,
             i_abacus_dcache_line_fill_in_progress = abacus_dcache_line_fill_in_progress,
-            i_s_awvalid = Open(),
-            i_s_awaddr = Open(),
-            i_s_wvalid = Open(),
-            i_s_wdata = Open(),
-            i_s_bready = Open(),
-            i_s_arvalid = Open(),
-            i_s_araddr = Open(),
-            i_s_rready = Open(),
-            o_s_awready = Open(),
-            o_s_wready = Open(),
-            o_s_bvalid = Open(),
-            o_s_arready = Open(),
-            o_s_rvalid = Open(),
-            o_s_rdata = Open()
-        )
+            i_abacus_branch_misprediction = abacus_branch_misprediction,
+            i_abacus_ras_misprediction = abacus_ras_misprediction,
+            i_abacus_issue_no_instruction_stat = abacus_issue_no_instruction_stat,
+            i_abacus_issue_no_id_stat = abacus_issue_no_id_stat,
+            i_abacus_issue_flush_stat = abacus_issue_flush_stat,
+            i_abacus_issue_unit_busy_stat = abacus_issue_unit_busy_stat,
+            i_abacus_issue_operands_not_ready_stat = abacus_issue_operands_not_ready_stat,
+            i_abacus_issue_hold_stat = abacus_issue_hold_stat,
+            i_abacus_issue_multi_source_stat = abacus_issue_multi_source_stat,
+        
+            i_S_AXI_AWVALID = Open(),
+            i_S_AXI_AWADDR = Open(),
+            i_S_AXI_WVALID = Open(),
+            i_S_AXI_WDATA = Open(),
+            i_S_AXI_BREADY = Open(),
+            i_S_AXI_ARVALID = Open(),
+            i_S_AXI_ARADDR = Open(),
+            i_S_AXI_RREADY = Open(),
+            o_S_AXI_AWREADY = Open(),
+            o_S_AXI_WREADY = Open(),
+            o_S_AXI_BVALID = Open(),
+            o_S_AXI_ARREADY = Open(),
+            o_S_AXI_RVALID = Open(),
+            o_S_AXI_RDATA = Open()
 
+            )
         soc.bus.add_slave("test", testbus, region=SoCRegion(origin=self.test_base, size=0x1_0000, cached=False))
 

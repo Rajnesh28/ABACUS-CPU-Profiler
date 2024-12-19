@@ -49,7 +49,7 @@ logic issue_multi_source_stat_prev;
 int i;
 
 always_ff @(posedge clk or posedge rst) begin
-    if (rst) begin
+    if (rst | ~enable) begin
 
         branch_misprediction_counter_reg <= 32'h0;
         ras_misprediction_counter_reg <= 32'h0;
@@ -61,6 +61,16 @@ always_ff @(posedge clk or posedge rst) begin
         issue_hold_stat_counter_reg <= 32'h0;
         issue_multi_source_stat_counter_reg <= 32'h0;
 
+        branch_misprediction_counter_reg <= 32'h0;
+        ras_misprediction_counter_reg <= 32'h0;
+        issue_no_instruction_stat_counter_reg <= 32'h0;
+        issue_no_id_stat_counter_reg <= 32'h0;
+        issue_flush_stat_counter_reg <= 32'h0;
+        issue_unit_busy_stat_counter_reg <= 32'h0;
+        issue_operands_not_ready_stat_counter_reg <= 32'h0;
+        issue_hold_stat_counter_reg <= 32'h0;
+        issue_multi_source_stat_counter_reg <= 32'h0;
+        
         branch_misprediction_prev <= 0;
         ras_misprediction_prev <= 0;
         issue_no_instruction_stat_prev <= 0;
@@ -74,28 +84,7 @@ always_ff @(posedge clk or posedge rst) begin
         i <= 0; //Initialize counter
 
     end else if (~enable) begin
-        branch_misprediction_counter_reg <= 32'h0;
-        ras_misprediction_counter_reg <= 32'h0;
-        issue_no_instruction_stat_counter_reg <= 32'h0;
-        issue_no_id_stat_counter_reg <= 32'h0;
-        issue_flush_stat_counter_reg <= 32'h0;
-        issue_unit_busy_stat_counter_reg <= 32'h0;
-        issue_operands_not_ready_stat_counter_reg <= 32'h0;
-        issue_hold_stat_counter_reg <= 32'h0;
-        issue_multi_source_stat_counter_reg <= 32'h0;
 
-        branch_misprediction_prev <= 0;
-        ras_misprediction_prev <= 0;
-        issue_no_instruction_stat_prev <= 0;
-        issue_no_id_stat_prev <= 0;
-        issue_flush_stat_prev <= 0;
-        issue_unit_busy_stat_prev <= 0;
-        issue_operands_not_ready_stat_prev <= 0;
-        issue_hold_stat_prev <= 0;
-        issue_multi_source_stat_prev <= 0;
-
-        i <= 0; //Initialize counter
-        
     end else begin
         if (~branch_misprediction_prev && branch_misprediction) begin 
             branch_misprediction_counter_reg <= branch_misprediction_counter_reg + 1;
@@ -142,21 +131,15 @@ always_ff @(posedge clk or posedge rst) begin
         end
         issue_multi_source_stat_prev <= issue_multi_source_stat;
 
-        // Increment counter and update output registers at the specified interval
-        if (i == CLOCK_FREQ*2) begin  // Update all registers at twice the clock frequency.
-            branch_misprediction_counter <= branch_misprediction_counter_reg;
-            ras_misprediction_counter <= ras_misprediction_counter_reg;
-            issue_no_instruction_stat_counter <= issue_no_instruction_stat_counter_reg;
-            issue_no_id_stat_counter <= issue_no_id_stat_counter_reg;
-            issue_flush_stat_counter <= issue_flush_stat_counter_reg;
-            issue_unit_busy_stat_counter <= issue_unit_busy_stat_counter_reg;
-            issue_operands_not_ready_stat_counter <= issue_operands_not_ready_stat_counter_reg;
-            issue_hold_stat_counter <= issue_hold_stat_counter_reg;
-            issue_multi_source_stat_counter <= issue_multi_source_stat_counter_reg;
-            i <= 0;
-        end else begin
-            i <= i + 1;
-        end
+        branch_misprediction_counter <= branch_misprediction_counter_reg;
+        ras_misprediction_counter <= ras_misprediction_counter_reg;
+        issue_no_instruction_stat_counter <= issue_no_instruction_stat_counter_reg;
+        issue_no_id_stat_counter <= issue_no_id_stat_counter_reg;
+        issue_flush_stat_counter <= issue_flush_stat_counter_reg;
+        issue_unit_busy_stat_counter <= issue_unit_busy_stat_counter_reg;
+        issue_operands_not_ready_stat_counter <= issue_operands_not_ready_stat_counter_reg;
+        issue_hold_stat_counter <= issue_hold_stat_counter_reg;
+        issue_multi_source_stat_counter <= issue_multi_source_stat_counter_reg;
     end
 end
 

@@ -10,6 +10,8 @@ module abacus_top
     parameter unsigned CLOCK_FREQ                = 1000000 // 1MHz
 )
 (
+    input logic clk,
+    input logic rst,
 
     input [31:0] abacus_instruction,
     input abacus_instruction_issued,
@@ -31,9 +33,7 @@ module abacus_top
 	input logic abacus_issue_hold_stat,
 	input logic abacus_issue_multi_source_stat,
 
-    // AXI-Lite Interface from Vivado IP Generator
-    input wire  S_AXI_ACLK,
-    input wire  S_AXI_ARESETN,
+    // Modified AXI-Lite Interface from Vivado IP Generator
     input wire [C_S_AXI_ADDR_WIDTH-1 : 0] S_AXI_AWADDR,
     input wire  S_AXI_AWVALID,
     output wire  S_AXI_AWREADY,
@@ -51,10 +51,8 @@ module abacus_top
     output wire [1 : 0] S_AXI_RRESP,
     output wire  S_AXI_RVALID,
     input wire  S_AXI_RREADY,
-
+    
     // Wishbone signals
-    input logic clk,
-    input logic rst,
     input logic wb_cyc,
     input logic wb_stb,
     input logic wb_we,
@@ -156,10 +154,7 @@ generate if (WITH_AXI) begin : gen_axi_if
 	reg [C_S_AXI_DATA_WIDTH-1 : 0] 	axi_rdata;
 	reg [1 : 0] 	axi_rresp;
 	reg  	axi_rvalid;
-
-	localparam integer ADDR_LSB = (C_S_AXI_DATA_WIDTH/32) + 1;
-	localparam integer OPT_MEM_ADDR_BITS = 5;
-
+    
 	wire	 slv_reg_rden;
 	wire	 slv_reg_wren;
 	reg [C_S_AXI_DATA_WIDTH-1:0]	 reg_data_out;
@@ -176,14 +171,15 @@ generate if (WITH_AXI) begin : gen_axi_if
 	assign S_AXI_RDATA	= axi_rdata;
 	assign S_AXI_RRESP	= axi_rresp;
 	assign S_AXI_RVALID	= axi_rvalid;
+	
 	// Implement axi_awready generation
 	// axi_awready is asserted for one S_AXI_ACLK clock cycle when both
 	// S_AXI_AWVALID and S_AXI_WVALID are asserted. axi_awready is
 	// de-asserted when reset is low.
 
-	always @( posedge S_AXI_ACLK )
+	always @( posedge clk )
 	begin
-	  if ( S_AXI_ARESETN == 1'b0 )
+	  if ( rst == 1'b1 ) // revert
 	    begin
 	      axi_awready <= 1'b0;
 	      aw_en <= 1'b1;
@@ -215,9 +211,9 @@ generate if (WITH_AXI) begin : gen_axi_if
 	// This process is used to latch the address when both 
 	// S_AXI_AWVALID and S_AXI_WVALID are valid. 
 
-	always @( posedge S_AXI_ACLK )
+	always @( posedge clk )
 	begin
-	  if ( S_AXI_ARESETN == 1'b0 )
+	  if ( rst == 1'b1 ) // revert
 	    begin
 	      axi_awaddr <= 0;
 	    end 
@@ -236,9 +232,9 @@ generate if (WITH_AXI) begin : gen_axi_if
 	// S_AXI_AWVALID and S_AXI_WVALID are asserted. axi_wready is 
 	// de-asserted when reset is low. 
 
-	always @( posedge S_AXI_ACLK )
+	always @( posedge clk )
 	begin
-	  if ( S_AXI_ARESETN == 1'b0 )
+	  if ( rst == 1'b1 ) // revert
 	    begin
 	      axi_wready <= 1'b0;
 	    end 
@@ -268,9 +264,9 @@ generate if (WITH_AXI) begin : gen_axi_if
 	// and the slave is ready to accept the write address and write data.
 	assign slv_reg_wren = axi_wready && S_AXI_WVALID && axi_awready && S_AXI_AWVALID;
 
-	always @( posedge S_AXI_ACLK )
+	always @( posedge clk )
 	begin
-	  if ( S_AXI_ARESETN == 1'b0 )
+	  if ( rst == 1'b1 ) // revert
 	    begin
             instruction_profile_unit_enable_reg <= 0;
             cache_profile_unit_enable_reg <= 0;
@@ -278,23 +274,15 @@ generate if (WITH_AXI) begin : gen_axi_if
 	  else begin
 	    if (slv_reg_wren)
 	      begin
-	        case ( axi_awaddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] )
+	        case ( axi_awaddr )
                 INSTRUCTION_PROFILE_UNIT_ENABLE_ADDR:
-	            for ( byte_index = 0; byte_index <= (C_S_AXI_DATA_WIDTH/8)-1; byte_index = byte_index+1 )
-	              if ( S_AXI_WSTRB[byte_index] == 1 ) begin
-	                instruction_profile_unit_enable_reg[(byte_index*8) +: 8] <= S_AXI_WDATA[(byte_index*8) +: 8];
-	              end  
+	                instruction_profile_unit_enable_reg <= S_AXI_WDATA;
+	                
                 CACHE_PROFILE_UNIT_ENABLE_ADDR:
-	            for ( byte_index = 0; byte_index <= (C_S_AXI_DATA_WIDTH/8)-1; byte_index = byte_index+1 )
-	              if ( S_AXI_WSTRB[byte_index] == 1 ) begin
-	                cache_profile_unit_enable_reg[(byte_index*8) +: 8] <= S_AXI_WDATA[(byte_index*8) +: 8];
-	              end  
+	                cache_profile_unit_enable_reg <= S_AXI_WDATA;
 
 				  STALL_UNIT_ENABLE_ADDR:
-				  for ( byte_index = 0; byte_index <= (C_S_AXI_DATA_WIDTH/8)-1; byte_index = byte_index+1 )
-					if ( S_AXI_WSTRB[byte_index] == 1 ) begin
-					  stall_unit_enable_reg[(byte_index*8) +: 8] <= S_AXI_WDATA[(byte_index*8) +: 8];
-					end  
+					  stall_unit_enable_reg <= S_AXI_WDATA;
 
 	          default : begin
                     instruction_profile_unit_enable_reg <= instruction_profile_unit_enable_reg;
@@ -312,9 +300,9 @@ generate if (WITH_AXI) begin : gen_axi_if
 	// This marks the acceptance of address and indicates the status of 
 	// write transaction.
 
-	always @( posedge S_AXI_ACLK )
+	always @( posedge clk )
 	begin
-	  if ( S_AXI_ARESETN == 1'b0 )
+	  if ( rst == 1'b1 ) // revert
 	    begin
 	      axi_bvalid  <= 0;
 	      axi_bresp   <= 2'b0;
@@ -346,9 +334,9 @@ generate if (WITH_AXI) begin : gen_axi_if
 	// The read address is also latched when S_AXI_ARVALID is 
 	// asserted. axi_araddr is reset to zero on reset assertion.
 
-	always @( posedge S_AXI_ACLK )
+	always @( posedge clk )
 	begin
-	  if ( S_AXI_ARESETN == 1'b0 )
+	  if ( rst == 1'b1 ) // revert
 	    begin
 	      axi_arready <= 1'b0;
 	      axi_araddr  <= 32'b0;
@@ -377,9 +365,9 @@ generate if (WITH_AXI) begin : gen_axi_if
 	// bus and axi_rresp indicates the status of read transaction.axi_rvalid 
 	// is deasserted on reset (active low). axi_rresp and axi_rdata are 
 	// cleared to zero on reset (active low).  
-	always @( posedge S_AXI_ACLK )
+	always @( posedge clk )
 	begin
-	  if ( S_AXI_ARESETN == 1'b0 )
+	  if ( rst == 1'b1 ) // revert
 	    begin
 	      axi_rvalid <= 0;
 	      axi_rresp  <= 0;
@@ -407,7 +395,7 @@ generate if (WITH_AXI) begin : gen_axi_if
 	always @(*)
 	begin
 	      // Address decoding for reading registers
-	      case ( axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] )
+	      case ( axi_araddr )
             INSTRUCTION_PROFILE_UNIT_ENABLE_ADDR   : reg_data_out <= instruction_profile_unit_enable_reg;
             CACHE_PROFILE_UNIT_ENABLE_ADDR   : reg_data_out <= cache_profile_unit_enable_reg;
 			STALL_UNIT_ENABLE_ADDR	: reg_data_out <= stall_unit_enable_reg;
@@ -448,9 +436,9 @@ generate if (WITH_AXI) begin : gen_axi_if
 	end
 
 	// Output register or memory read data
-	always @( posedge S_AXI_ACLK )
+	always @( posedge clk )
 	begin
-	  if ( S_AXI_ARESETN == 1'b0 )
+	  if ( rst == 1'b1 ) // revert
 	    begin
 	      axi_rdata  <= 0;
 	    end 
@@ -546,7 +534,7 @@ generate if (INCLUDE_INSTRUCTION_PROFILER) begin : gen_instruction_profiler_if
     instruction_profiler_block (
         .clk(clk),
         .rst(rst),
-        .enable(instruction_profile_unit_enable_reg[0]),
+        .enable(instruction_profile_unit_enable_reg),
         .instruction_issued(abacus_instruction_issued),
         .instruction(abacus_instruction),
         .load_word_counter(load_word_counter_reg),
@@ -569,7 +557,7 @@ generate if (INCLUDE_CACHE_PROFILER) begin : gen_cache_profiler_if
     cache_profiler_block (
         .clk(clk),
         .rst(rst),
-        .enable(cache_profile_unit_enable_reg[0]),
+        .enable(cache_profile_unit_enable_reg),
         .icache_request(abacus_icache_request),
         .dcache_request(abacus_dcache_request),
         .icache_miss(abacus_icache_miss),
@@ -592,7 +580,7 @@ generate if (INCLUDE_STALL_UNIT) begin : gen_stall_unit_if
 	stall_unit_block (
 		.clk(clk),
 		.rst(rst),
-		.enable(stall_unit_enable_reg[0]),
+		.enable(stall_unit_enable_reg),
 		.branch_misprediction(abacus_branch_misprediction),
 		.ras_misprediction(abacus_ras_misprediction),
 		.issue_no_instruction_stat(abacus_issue_no_instruction_stat),
