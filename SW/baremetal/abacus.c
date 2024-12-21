@@ -11,6 +11,7 @@ int enable_dcache_profiling(void);
 int disable_dcache_profiling(void);
 int enable_stall_unit(void);
 int disable_stall_unit(void);
+void stall_unit_profile(void);
 
 #define ABACUS_BASE_ADDR 0xf0030000
 #define INSTRUCTION_PROFILE_UNIT_BASE_ADDR (ABACUS_BASE_ADDR + 0x0100)
@@ -82,7 +83,7 @@ void icache_profile(void) {
     printf("The number of icache requests: %u\n", *(ICACHE_REQUEST_COUNTER_REG));
     printf("The number of icache hits: %u\n", *(ICACHE_HIT_COUNTER_REG));
     printf("The number of icache misses: %u\n", *(ICACHE_MISS_COUNTER_REG));
-    printf("The average number of clock cycles to replace a line in the instruction cache with the current replacement policy is: %u\n", *(ICACHE_LINE_FILL_LATENCY_COUNTER_REG) / *(ICACHE_REQUEST_COUNTER_REG));
+    printf("The number of clock cycles to replace a line in the instruction cache with the current replacement policy is: %u\n", *(ICACHE_LINE_FILL_LATENCY_COUNTER_REG));
 }
 
 int enable_icache_profiling(void) {
@@ -99,7 +100,7 @@ void dcache_profile(void) {
     printf("The number of dcache requests: %u\n", *(DCACHE_REQUEST_COUNTER_REG));
     printf("The number of dcache hits: %u\n", *(DCACHE_HIT_COUNTER_REG));
     printf("The number of dcache misses: %u\n", *(DCACHE_MISS_COUNTER_REG));
-    printf("The average number of clock cycles to replace a line in the data cache with the current replacement policy is: %u\n", *(DCACHE_LINE_FILL_LATENCY_COUNTER_REG) / *(DCACHE_REQUEST_COUNTER_REG));
+    printf("The number of clock cycles to replace a line in the data cache with the current replacement policy is: %u\n", *(DCACHE_LINE_FILL_LATENCY_COUNTER_REG));
 }
 
 int enable_dcache_profiling(void) {
