@@ -26,13 +26,10 @@ volatile unsigned int* LOAD_WORD_COUNTER_REG = (volatile unsigned int*)(INSTRUCT
 volatile unsigned int* STORE_WORD_COUNTER_REG = (volatile unsigned int*)(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x04);
 volatile unsigned int* ADDITION_COUNTER_REG = (volatile unsigned int*)(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x08);
 volatile unsigned int* SUBTRACTION_COUNTER_REG = (volatile unsigned int*)(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x0C);
-volatile unsigned int* LOGICAL_BITWISE_COUNTER_REG = (volatile unsigned int*)(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x10);
-volatile unsigned int* SHIFT_BITWISE_COUNTER_REG = (volatile unsigned int*)(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x14);
-volatile unsigned int* COMPARISON_COUNTER_REG = (volatile unsigned int*)(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x18);
-volatile unsigned int* BRANCH_COUNTER_REG = (volatile unsigned int*)(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x1C);
-volatile unsigned int* JUMP_COUNTER_REG = (volatile unsigned int*)(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x20);
-volatile unsigned int* SYSTEM_PRIVILEGE_COUNTER_REG = (volatile unsigned int*)(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x24);
-volatile unsigned int* ATOMIC_COUNTER_REG = (volatile unsigned int*)(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x28);
+volatile unsigned int* BRANCH_COUNTER_REG = (volatile unsigned int*)(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x10);
+volatile unsigned int* JUMP_COUNTER_REG = (volatile unsigned int*)(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x14);
+volatile unsigned int* SYSTEM_PRIVILEGE_COUNTER_REG = (volatile unsigned int*)(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x18);
+volatile unsigned int* ATOMIC_COUNTER_REG = (volatile unsigned int*)(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x1C);
 
 volatile unsigned int* ICACHE_REQUEST_COUNTER_REG = (volatile unsigned int*)(CACHE_PROFILE_UNIT_BASE_ADDR + 0x00);
 volatile unsigned int* ICACHE_HIT_COUNTER_REG = (volatile unsigned int*)(CACHE_PROFILE_UNIT_BASE_ADDR + 0x04);
@@ -60,9 +57,6 @@ void instruction_profile(void) {
     printf("The number of store word: %u\n", *(STORE_WORD_COUNTER_REG));
     printf("The number of adds: %u\n", *(ADDITION_COUNTER_REG));
     printf("The number of subtractions: %u\n", *(SUBTRACTION_COUNTER_REG));
-    printf("The number of logical bitwise operations: %u\n", *(LOGICAL_BITWISE_COUNTER_REG));
-    printf("The number of shift bitwise operations: %u\n", *(SHIFT_BITWISE_COUNTER_REG));
-    printf("The number of comparisons: %u\n", *(COMPARISON_COUNTER_REG));
     printf("The number of branches: %u\n", *(BRANCH_COUNTER_REG));
     printf("The number of jumps: %u\n", *(JUMP_COUNTER_REG));
     printf("The number of system privilege instructions: %u\n", *(SYSTEM_PRIVILEGE_COUNTER_REG));
@@ -136,5 +130,4 @@ void stall_unit_profile(void) {
 	printf("Issue operands were not ready: %u \n", *(ISSUE_OPERANDS_NOT_READY_STAT_COUNTER_REG));
 	printf("Issue hold: %u \n", *(ISSUE_HOLD_STAT_COUNTER_REG));
 	printf("Issue multi source: %u \n", *(ISSUE_MULTI_SOURCE_STATS));
-
 }

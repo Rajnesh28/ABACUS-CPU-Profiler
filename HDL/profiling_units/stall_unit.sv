@@ -26,15 +26,15 @@ module stall_unit #
     output logic [31:0] issue_multi_source_stat_counter
 );
 
-reg [31:0] branch_misprediction_counter_reg                     = 32'h0;
-reg [31:0] ras_misprediction_counter_reg                        = 32'h0;
-reg [31:0] issue_no_instruction_stat_counter_reg                = 32'h0;
-reg [31:0] issue_no_id_stat_counter_reg                         = 32'h0;
-reg [31:0] issue_flush_stat_counter_reg                         = 32'h0;
-reg [31:0] issue_unit_busy_stat_counter_reg                     = 32'h0;
-reg [31:0] issue_operands_not_ready_stat_counter_reg            = 32'h0;
-reg [31:0] issue_hold_stat_counter_reg                          = 32'h0;
-reg [31:0] issue_multi_source_stat_counter_reg                  = 32'h0;
+reg [31:0] branch_misprediction_counter_reg;
+reg [31:0] ras_misprediction_counter_reg;
+reg [31:0] issue_no_instruction_stat_counter_reg;
+reg [31:0] issue_no_id_stat_counter_reg;
+reg [31:0] issue_flush_stat_counter_reg;
+reg [31:0] issue_unit_busy_stat_counter_reg;
+reg [31:0] issue_operands_not_ready_stat_counter_reg;
+reg [31:0] issue_hold_stat_counter_reg;
+reg [31:0] issue_multi_source_stat_counter_reg;
 
 logic branch_misprediction_prev;
 logic ras_misprediction_prev;
@@ -61,15 +61,15 @@ always_ff @(posedge clk or posedge rst) begin
         issue_hold_stat_counter_reg <= 32'h0;
         issue_multi_source_stat_counter_reg <= 32'h0;
 
-        branch_misprediction_counter_reg <= 32'h0;
-        ras_misprediction_counter_reg <= 32'h0;
-        issue_no_instruction_stat_counter_reg <= 32'h0;
-        issue_no_id_stat_counter_reg <= 32'h0;
-        issue_flush_stat_counter_reg <= 32'h0;
-        issue_unit_busy_stat_counter_reg <= 32'h0;
-        issue_operands_not_ready_stat_counter_reg <= 32'h0;
-        issue_hold_stat_counter_reg <= 32'h0;
-        issue_multi_source_stat_counter_reg <= 32'h0;
+        branch_misprediction_counter <= 32'h0;
+        ras_misprediction_counter <= 32'h0;
+        issue_no_instruction_stat_counter <= 32'h0;
+        issue_no_id_stat_counter <= 32'h0;
+        issue_flush_stat_counter <= 32'h0;
+        issue_unit_busy_stat_counter <= 32'h0;
+        issue_operands_not_ready_stat_counter <= 32'h0;
+        issue_hold_stat_counter <= 32'h0;
+        issue_multi_source_stat_counter <= 32'h0;
         
         branch_misprediction_prev <= 0;
         ras_misprediction_prev <= 0;
@@ -82,8 +82,6 @@ always_ff @(posedge clk or posedge rst) begin
         issue_multi_source_stat_prev <= 0;
 
         i <= 0; //Initialize counter
-
-    end else if (~enable) begin
 
     end else begin
         if (~branch_misprediction_prev && branch_misprediction) begin 

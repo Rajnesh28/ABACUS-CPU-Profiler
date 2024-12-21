@@ -47,9 +47,6 @@ static ssize_t device_read(struct file *file, char __user *buffer, size_t len, l
     unsigned int store_word_counter;
     unsigned int addition_counter;
     unsigned int subtraction_counter;
-    unsigned int logical_bitwise_counter;
-    unsigned int shift_bitwise_counter;
-    unsigned int comparison_counter;
     unsigned int branch_counter;
     unsigned int jump_counter;
     unsigned int system_counter;
@@ -97,13 +94,10 @@ static ssize_t device_read(struct file *file, char __user *buffer, size_t len, l
         store_word_counter = ioread32(abacus_base + 0x104);
         addition_counter = ioread32(abacus_base + 0x108);
         subtraction_counter = ioread32(abacus_base + 0x10C);
-        logical_bitwise_counter = ioread32(abacus_base + 0x110);
-        shift_bitwise_counter = ioread32(abacus_base + 0x114);
-        comparison_counter = ioread32(abacus_base + 0x118);
-        branch_counter = ioread32(abacus_base + 0x11C);
-        jump_counter = ioread32(abacus_base + 0x120);
-        system_counter = ioread32(abacus_base + 0x124);
-        atomic_counter = ioread32(abacus_base + 0x128);
+        branch_counter = ioread32(abacus_base + 0x110);
+        jump_counter = ioread32(abacus_base + 0x114);
+        system_counter = ioread32(abacus_base + 0x118);
+        atomic_counter = ioread32(abacus_base + 0x11C);
 
         pr_info("Debug: Read the IP unit\n");
 
@@ -112,16 +106,12 @@ static ssize_t device_read(struct file *file, char __user *buffer, size_t len, l
                         "Store Word: %u\n"
                         "Addition: %u\n"
                         "Subtraction: %u\n"
-                        "Logical Bitwise: %u\n"
-                        "Shift Bitwise: %u\n"
-                        "Comparisons: %u\n"
                         "Branches: %u\n"
                         "Jumps: %u\n"
                         "System Privilege: %u\n"
                         "Atomic: %u\n",
                         load_word_counter, store_word_counter, addition_counter, subtraction_counter,
-                        logical_bitwise_counter, shift_bitwise_counter, comparison_counter, branch_counter,
-                        jump_counter, system_counter, atomic_counter);
+                        branch_counter, jump_counter, system_counter, atomic_counter);
     } 
     
     else if (strcmp(command, "get_icp_stats") == 0) {

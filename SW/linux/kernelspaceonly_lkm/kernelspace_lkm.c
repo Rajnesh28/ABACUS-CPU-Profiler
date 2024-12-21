@@ -16,9 +16,6 @@ volatile unsigned int __iomem *LOAD_WORD_COUNTER_REG;
 volatile unsigned int __iomem *STORE_WORD_COUNTER_REG;
 volatile unsigned int __iomem *ADDITION_COUNTER_REG;
 volatile unsigned int __iomem *SUBTRACTION_COUNTER_REG;
-volatile unsigned int __iomem *LOGICAL_BITWISE_COUNTER_REG;
-volatile unsigned int __iomem *SHIFT_BITWISE_COUNTER_REG;
-volatile unsigned int __iomem *COMPARISON_COUNTER_REG;
 volatile unsigned int __iomem *BRANCH_COUNTER_REG;
 volatile unsigned int __iomem *JUMP_COUNTER_REG;
 volatile unsigned int __iomem *SYSTEM_PRIVILEGE_COUNTER_REG;
@@ -46,9 +43,6 @@ static void instruction_profile(void) {
     printk(KERN_INFO "STORE_WORD_COUNTER: %u\n", ioread32(STORE_WORD_COUNTER_REG));
     printk(KERN_INFO "ADDITION_COUNTER: %u\n", ioread32(ADDITION_COUNTER_REG));
     printk(KERN_INFO "SUBTRACTION_COUNTER: %u\n", ioread32(SUBTRACTION_COUNTER_REG));
-    printk(KERN_INFO "LOGICAL_BITWISE_COUNTER: %u\n", ioread32(LOGICAL_BITWISE_COUNTER_REG));
-    printk(KERN_INFO "SHIFT_BITWISE_COUNTER: %u\n", ioread32(SHIFT_BITWISE_COUNTER_REG));
-    printk(KERN_INFO "COMPARISON_COUNTER: %u\n", ioread32(COMPARISON_COUNTER_REG));
     printk(KERN_INFO "BRANCH_COUNTER: %u\n", ioread32(BRANCH_COUNTER_REG));
     printk(KERN_INFO "JUMP_COUNTER: %u\n", ioread32(JUMP_COUNTER_REG));
     printk(KERN_INFO "SYSTEM_PRIVILEGE_COUNTER: %u\n", ioread32(SYSTEM_PRIVILEGE_COUNTER_REG));
@@ -121,17 +115,16 @@ static int __init abacus_profiler_init(void) {
     INSTRUCTION_PROFILE_UNIT_ENABLE = ioremap(ABACUS_BASE_ADDR + 0x04, sizeof(unsigned int));
     CACHE_PROFILE_UNIT_ENABLE = ioremap(ABACUS_BASE_ADDR + 0x08, sizeof(unsigned int));
 	STALL_UNIT_ENABLE = ioremap(ABACUS_BASE_ADDR + 0x0C, sizeof(unsigned int));
+
     LOAD_WORD_COUNTER_REG = ioremap(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x00, sizeof(unsigned int));
     STORE_WORD_COUNTER_REG = ioremap(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x04, sizeof(unsigned int));
     ADDITION_COUNTER_REG = ioremap(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x08, sizeof(unsigned int));
     SUBTRACTION_COUNTER_REG = ioremap(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x0C, sizeof(unsigned int));
-    LOGICAL_BITWISE_COUNTER_REG = ioremap(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x10, sizeof(unsigned int));
-    SHIFT_BITWISE_COUNTER_REG = ioremap(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x14, sizeof(unsigned int));
-    COMPARISON_COUNTER_REG = ioremap(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x18, sizeof(unsigned int));
-    BRANCH_COUNTER_REG = ioremap(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x1C, sizeof(unsigned int));
-    JUMP_COUNTER_REG = ioremap(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x20, sizeof(unsigned int));
-    SYSTEM_PRIVILEGE_COUNTER_REG = ioremap(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x24, sizeof(unsigned int));
-    ATOMIC_COUNTER_REG = ioremap(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x28, sizeof(unsigned int));
+    BRANCH_COUNTER_REG = ioremap(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x10, sizeof(unsigned int));
+    JUMP_COUNTER_REG = ioremap(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x14, sizeof(unsigned int));
+    SYSTEM_PRIVILEGE_COUNTER_REG = ioremap(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x18, sizeof(unsigned int));
+    ATOMIC_COUNTER_REG = ioremap(INSTRUCTION_PROFILE_UNIT_BASE_ADDR + 0x1C, sizeof(unsigned int));
+
     ICACHE_REQUEST_COUNTER_REG = ioremap(CACHE_PROFILE_UNIT_BASE_ADDR + 0x00, sizeof(unsigned int));
     ICACHE_HIT_COUNTER_REG = ioremap(CACHE_PROFILE_UNIT_BASE_ADDR + 0x04, sizeof(unsigned int));
     ICACHE_MISS_COUNTER_REG = ioremap(CACHE_PROFILE_UNIT_BASE_ADDR + 0x08, sizeof(unsigned int));
@@ -140,6 +133,7 @@ static int __init abacus_profiler_init(void) {
     DCACHE_HIT_COUNTER_REG = ioremap(CACHE_PROFILE_UNIT_BASE_ADDR + 0x14, sizeof(unsigned int));
     DCACHE_MISS_COUNTER_REG = ioremap(CACHE_PROFILE_UNIT_BASE_ADDR + 0x18, sizeof(unsigned int));
     DCACHE_LINE_FILL_LATENCY_COUNTER_REG = ioremap(CACHE_PROFILE_UNIT_BASE_ADDR + 0x1C, sizeof(unsigned int));
+
 	BRANCH_MISPREDICTION_COUNTER_REG = ioremap(STALL_UNIT_BASE_ADDR + 0x00, sizeof(unsigned int));
 	RAS_MISPREDICTION_COUNTER_REG = ioremap(STALL_UNIT_BASE_ADDR + 0x04, sizeof(unsigned int));
 	ISSUE_NO_INSTRUCTION_STAT_COUNTER_REG = ioremap(STALL_UNIT_BASE_ADDR + 0x08, sizeof(unsigned int));
@@ -174,9 +168,6 @@ static void __exit abacus_profiler_exit(void) {
     iounmap(STORE_WORD_COUNTER_REG);
     iounmap(ADDITION_COUNTER_REG);
     iounmap(SUBTRACTION_COUNTER_REG);
-    iounmap(LOGICAL_BITWISE_COUNTER_REG);
-    iounmap(SHIFT_BITWISE_COUNTER_REG);
-    iounmap(COMPARISON_COUNTER_REG);
     iounmap(BRANCH_COUNTER_REG);
     iounmap(JUMP_COUNTER_REG);
     iounmap(SYSTEM_PRIVILEGE_COUNTER_REG);
