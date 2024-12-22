@@ -24,10 +24,9 @@ extern int disable_icache_profiling(void);
 extern void dcache_profile(void);
 extern int enable_dcache_profiling(void);
 extern int disable_dcache_profiling(void);
-
-/*-----------------------------------------------------------------------*/
-/* Basic String Input and Token Handling                                 */
-/*-----------------------------------------------------------------------*/
+extern int enable_stall_unit(void);
+extern int disable_stall_unit(void);
+extern void stall_unit_profile(void);
 
 static char *readstr(void) {
 	char c[2];
@@ -80,16 +79,12 @@ static char *get_token(char **str) {
 	return d;
 }
 
-/*-----------------------------------------------------------------------*/
-/* Prompt and Help                                                       */
-/*-----------------------------------------------------------------------*/
 
 static void prompt(void) {
-	printf("\e[92;1mlitex-demo-app\e[0m> ");
+	printf("\e[92;1mabacus-demo-app\e[0m> ");
 }
 
 static void help(void) {
-	puts("\nABACUS Bare Metal Program built on "__DATE__" "__TIME__"\n");
 	puts("Available commands:");
 	puts("help               - Show this command");
 	puts("reboot             - Reboot CPU");
@@ -102,24 +97,18 @@ static void help(void) {
 	puts("enable_dcp         - Enable data cache profiling");
 	puts("disable_dcp        - Disable data cache profiling");
 	puts("get_dcp_stats      - Show data cache profiling stats");
+	puts("enable_su			 - Enable the stall unit profiler");
+	puts("disable_su		 - Disable the stall unit profiler");
+	puts("get_su_stats		 - Show stall unit stats");
 }
-
-/*-----------------------------------------------------------------------*/
-/* Commands                                                              */
-/*-----------------------------------------------------------------------*/
 
 static void reboot_cmd(void) {
 	ctrl_reset_write(1);
 }
 
-/*-----------------------------------------------------------------------*/
-/* Console Service                                                       */
-/*-----------------------------------------------------------------------*/
-
 static void console_service(void) {
 	char *str;
 	char *token;
-
 	str = readstr();
 	if (str == NULL) return;
 
@@ -165,18 +154,26 @@ static void console_service(void) {
 			printf("Error: Could not disable data cache profiling\n");
 	} else if (strcmp(token, "get_dcp_stats") == 0) {
 		dcache_profile();
-	} else {
-		printf("Unknown command: %s\n", token);
+	} else if (strcmp(token, "enable_su") == 0) {
+		if (enable_stall_unit())
+			printf("Stall unit enabled\n");
+		else
+			printf("Error: Could not enable stall unit");
+	} else if (strcmp(token, "disable_su") == 0) {
+		if (disable_stall_unit())
+			printf("Stall unit disabled\n");
+		else
+			printf("Error: Could not disable stall unit");
+	} else if (strcmp(token, "get_su_stats") == 0) {
+		stall_unit_profile();
 	}
-}
 
-/*-----------------------------------------------------------------------*/
-/* Main                                                                  */
-/*-----------------------------------------------------------------------*/
+	prompt();
+}
 
 int main(void) {
 	irq_setmask(0);
-	irq_setie(1);
+	irq_setie(1); // Enable interrupts
 	uart_init();
 
 	puts("\nABACUS Bare Metal Program built on "__DATE__" "__TIME__"\n");

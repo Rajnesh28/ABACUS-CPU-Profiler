@@ -4,8 +4,13 @@ include $(BUILD_DIR)/software/include/generated/variables.mak
 include /localhome/rajneshj/USRA/litex/litex/soc/software/common.mak
 
 OBJECTS   = abacus.o crt0.o main.o
+ifdef WITH_CXX
+	OBJECTS += hellocpp.o
+	CFLAGS += -DWITH_CXX
+endif
 
-all: abacus.bin
+
+all: demo.bin
 
 
 %.bin: %.elf
@@ -16,7 +21,7 @@ endif
 
 vpath %.a $(PACKAGES:%=../%)
 
-abacus.elf: $(OBJECTS)
+demo.elf: $(OBJECTS)
 	$(CC) $(LDFLAGS) -T linker.ld -N -o $@ \
 		$(OBJECTS) \
 		$(PACKAGES:%=-L$(BUILD_DIR)/software/%) \
@@ -32,6 +37,8 @@ endif
 # pull in dependency info for *existing* .o files
 -include $(OBJECTS:.o=.d)
 
+donut.o: CFLAGS   += -w
+
 VPATH = $(BIOS_DIRECTORY):$(BIOS_DIRECTORY)/cmds:$(CPU_DIRECTORY)
 
 
@@ -45,6 +52,6 @@ VPATH = $(BIOS_DIRECTORY):$(BIOS_DIRECTORY)/cmds:$(CPU_DIRECTORY)
 	$(assemble)
 
 clean:
-	$(RM) $(OBJECTS) abacus.elf abacus.bin .*~ *~
+	$(RM) $(OBJECTS) demo.elf demo.bin .*~ *~
 
 .PHONY: all clean

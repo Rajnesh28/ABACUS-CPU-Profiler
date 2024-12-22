@@ -10,9 +10,6 @@ module instruction_profiler(
     output logic [31:0] store_word_counter, // SB, SH, SW
     output logic [31:0] addition_counter,   // ADD, ADDI, AUIPC
     output logic [31:0] subtraction_counter, // SUB
-    output logic [31:0] logical_bitwise_counter, // XOR, XORI, OR, ORI, AND, ANDI
-    output logic [31:0] shift_bitwise_counter,   // SLL, SLLI, SRL, SRLI, SRA, SRAI
-    output logic [31:0] comparison_counter, // SLT, SLTU
     output logic [31:0] branch_counter,     // BEQ, BNE, BLT, BGE, BLTU, BGEU
     output logic [31:0] jump_counter,       // JAL, JALR
     output logic [31:0] system_privilege_counter, // ECALL, EBREAK
@@ -22,19 +19,16 @@ module instruction_profiler(
 // Source: https://www.cs.sfu.ca/~ashriram/Courses/CS295/assets/notebooks/RISCV/RISCV_CARD.pdf
 
 // Counters for different instruction types, initialized to zero.
-reg [31:0] load_word_counter_reg        = 32'h0;
-reg [31:0] store_word_counter_reg       = 32'h0;
-reg [31:0] addition_counter_reg         = 32'h0;
-reg [31:0] subtraction_counter_reg      = 32'h0;
-reg [31:0] logical_bitwise_counter_reg  = 32'h0;
-reg [31:0] shift_bitwise_counter_reg    = 32'h0;
-reg [31:0] comparison_counter_reg       = 32'h0;
-reg [31:0] branch_counter_reg           = 32'h0;
-reg [31:0] jump_counter_reg             = 32'h0;
-reg [31:0] system_privilege_counter_reg = 32'h0;
-reg [31:0] atomic_counter_reg           = 32'h0;
+reg [31:0] load_word_counter_reg;
+reg [31:0] store_word_counter_reg;
+reg [31:0] addition_counter_reg;
+reg [31:0] subtraction_counter_reg;
+reg [31:0] branch_counter_reg;
+reg [31:0] jump_counter_reg; 
+reg [31:0] system_privilege_counter_reg;
+reg [31:0] atomic_counter_reg;
 
-reg [31:0] last_sampled_instruction     = 32'h0;
+reg [31:0] last_sampled_instruction;
 
 // Procedure to increment counters
 always_ff @(posedge clk or posedge rst) begin
@@ -44,9 +38,6 @@ always_ff @(posedge clk or posedge rst) begin
         store_word_counter_reg       <= 32'b0;
         addition_counter_reg         <= 32'b0;
         subtraction_counter_reg      <= 32'b0;
-        logical_bitwise_counter_reg  <= 32'b0;
-        shift_bitwise_counter_reg    <= 32'b0;
-        comparison_counter_reg       <= 32'b0;
         branch_counter_reg           <= 32'b0;
         jump_counter_reg             <= 32'b0;
         system_privilege_counter_reg <= 32'b0;
@@ -75,13 +66,6 @@ always_ff @(posedge clk or posedge rst) begin
                             7'b0100000: subtraction_counter_reg <= subtraction_counter_reg + 1; // SUB
                         endcase
                     end
-                    3'b001: shift_bitwise_counter_reg <= shift_bitwise_counter_reg + 1;
-                    3'b010: comparison_counter_reg <= comparison_counter_reg + 1;
-                    3'b011: comparison_counter_reg <= comparison_counter_reg + 1;
-                    3'b100: logical_bitwise_counter_reg <= logical_bitwise_counter_reg + 1;
-                    3'b101: shift_bitwise_counter_reg <= shift_bitwise_counter_reg + 1;
-                    3'b110: logical_bitwise_counter_reg <= logical_bitwise_counter_reg + 1;
-                    3'b111: logical_bitwise_counter_reg <= logical_bitwise_counter_reg + 1;
                 endcase
             end
 
@@ -89,13 +73,6 @@ always_ff @(posedge clk or posedge rst) begin
             7'b0010011: begin
                 case (instruction[14:12]) // Check funct3
                     3'b000: addition_counter_reg <= addition_counter_reg + 1;
-                    3'b001: shift_bitwise_counter_reg <= shift_bitwise_counter_reg + 1;
-                    3'b010: comparison_counter_reg <= comparison_counter_reg + 1;
-                    3'b011: comparison_counter_reg <= comparison_counter_reg + 1;
-                    3'b100: logical_bitwise_counter_reg <= logical_bitwise_counter_reg + 1;
-                    3'b101: shift_bitwise_counter_reg <= shift_bitwise_counter_reg + 1;
-                    3'b110: logical_bitwise_counter_reg <= logical_bitwise_counter_reg + 1;
-                    3'b111: logical_bitwise_counter_reg <= logical_bitwise_counter_reg + 1;
                 endcase
             end
         endcase
@@ -110,9 +87,6 @@ always_comb begin
     store_word_counter       <= store_word_counter_reg;
     addition_counter         <= addition_counter_reg;
     subtraction_counter      <= subtraction_counter_reg;
-    logical_bitwise_counter  <= logical_bitwise_counter_reg;
-    shift_bitwise_counter    <= shift_bitwise_counter_reg;
-    comparison_counter       <= comparison_counter_reg;
     branch_counter           <= branch_counter_reg;
     jump_counter             <= jump_counter_reg;
     system_privilege_counter <= system_privilege_counter_reg;
