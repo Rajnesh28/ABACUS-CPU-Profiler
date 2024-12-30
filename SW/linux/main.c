@@ -83,7 +83,7 @@ int main() {
 
     /*  In order for this not to return an error eventually, 
     we need to ensure that we have loaded the kernel module with
-    `insmod abacus.ko`, and also create a character device that populations
+    `insmod abacus.ko`, and also create a character device that populates
     /dev/abacus with `mknod /dev/abacus c 28 0`   */
     int fd = open(DEVICE, O_RDWR);
     char input[128];
