@@ -29,6 +29,16 @@ module tb_abacus_top;
     logic abacus_icache_line_fill_in_progress;
     logic abacus_dcache_line_fill_in_progress;
 
+    logic abacus_branch_misprediction;
+    logic abacus_ras_misprediction;
+    logic abacus_issue_no_instruction_stat;
+    logic abacus_issue_no_id_stat;
+    logic abacus_issue_flush_stat;
+    logic abacus_issue_unit_busy_stat;
+    logic abacus_issue_operands_not_ready_stat;
+    logic abacus_issue_hold_stat;
+    logic abacus_issue_multi_source_stat;
+    
     // DUT instance
     abacus_top #(
         .ABACUS_BASE_ADDR(ABACUS_BASE_ADDR),
@@ -37,6 +47,7 @@ module tb_abacus_top;
     ) dut (
         .clk(clk),
         .rst(rst),
+
         .wb_cyc(wb_cyc),
         .wb_stb(wb_stb),
         .wb_we(wb_we),
@@ -44,6 +55,7 @@ module tb_abacus_top;
         .wb_dat_i(wb_dat_i),
         .wb_dat_o(wb_dat_o),
         .wb_ack(wb_ack),
+
         .abacus_instruction(abacus_instruction),
         .abacus_instruction_issued(abacus_instruction_issued),
         .abacus_icache_request(abacus_icache_request),
@@ -51,7 +63,15 @@ module tb_abacus_top;
         .abacus_icache_miss(abacus_icache_miss),
         .abacus_dcache_hit(abacus_dcache_hit),
         .abacus_icache_line_fill_in_progress(abacus_icache_line_fill_in_progress),
-        .abacus_dcache_line_fill_in_progress(abacus_dcache_line_fill_in_progress)
+        .abacus_dcache_line_fill_in_progress(abacus_dcache_line_fill_in_progress),
+        .abacus_branch_misprediction(abacus_branch_misprediction),
+        .abacus_ras_misprediction(abacus_ras_misprediction),
+        .abacus_issue_no_instruction_stat(abacus_issue_no_instruction_stat),
+        .abacus_issue_no_id_stat(issuabacus_issue_no_id_state_no_id_stat),
+        .abacus_issue_flush_stat(abacus_issue_flush_stat),
+        .abacus_issue_unit_busy_stat(abacus_issue_unit_busy_stat),
+        .abacus_issue_operands_not_ready_stat(abacus_issue_operands_not_ready_stat),
+        .abacus_issue_hold_stat(abacus_issue_hold_stat)
     );
 
     // Clock generation
@@ -101,9 +121,6 @@ module tb_abacus_top;
         $display("STORE_WORD_COUNT: %h", dut.store_word_counter_reg);
         $display("ADDITION_COUNT: %h", dut.addition_counter_reg);
         $display("SUBTRACTION_COUNT: %h", dut.subtraction_counter_reg);
-        $display("LOGICAL_BITWISE_COUNT: %h", dut.logical_bitwise_counter_reg);
-        $display("SHIFT_BITWISE_COUNT: %h", dut.shift_bitwise_counter_reg);
-        $display("COMPARISON_COUNT: %h", dut.comparison_counter_reg);
         $display("BRANCH_COUNT: %h", dut.branch_counter_reg);
         $display("JUMP_COUNT: %h", dut.jump_counter_reg);
         $display("SYSTEM_PRIVILEGE_COUNT: %h", dut.system_privilege_counter_reg);
@@ -114,9 +131,6 @@ module tb_abacus_top;
         assert(dut.store_word_counter_reg == 32'd3) else $fatal("Assertion failed for STORE_WORD_COUNT");
         assert(dut.addition_counter_reg == 32'd12) else $fatal("Assertion failed for ADD_COUNTER_COUNT");
         assert(dut.subtraction_counter_reg == 32'd2) else $fatal("Assertion failed for SUBTRACTION_COUNTER");
-        assert(dut.logical_bitwise_counter_reg == 32'd6) else $fatal("Assertion failed for LOGICAL_BITWISE_COUNT");
-        assert(dut.shift_bitwise_counter_reg == 32'd6) else $fatal("Assertion failed for SHIFT_BITWISE_COUNT");
-        assert(dut.comparison_counter_reg == 32'd8) else $fatal("Assertion failed for COMPARISON_COUNT");
         assert(dut.branch_counter_reg == 32'd6) else $fatal("Assertion failed for BRANCH_COUNT");
         assert(dut.jump_counter_reg == 32'd0) else $fatal("Assertion failed for JUMP_COUNT");
         assert(dut.system_privilege_counter_reg == 32'd5) else $fatal("Assertion failed for SYSTEM_PRIVILEGE_COUNT");
@@ -143,20 +157,13 @@ module tb_abacus_top;
         assert(dut.store_word_counter_reg == 32'd0) else $fatal("Assertion failed for STORE_WORD_COUNT");
         assert(dut.addition_counter_reg == 32'd0) else $fatal("Assertion failed for ADD_COUNTER_COUNT");
         assert(dut.subtraction_counter_reg == 32'd0) else $fatal("Assertion failed for SUBTRACTION_COUNTER");
-        assert(dut.logical_bitwise_counter_reg == 32'd0) else $fatal("Assertion failed for LOGICAL_BITWISE_COUNT");
-        assert(dut.shift_bitwise_counter_reg == 32'd0) else $fatal("Assertion failed for SHIFT_BITWISE_COUNT");
-        assert(dut.comparison_counter_reg == 32'd0) else $fatal("Assertion failed for COMPARISON_COUNT");
         assert(dut.branch_counter_reg == 32'd0) else $fatal("Assertion failed for BRANCH_COUNT");
         assert(dut.jump_counter_reg == 32'd0) else $fatal("Assertion failed for JUMP_COUNT");
         assert(dut.system_privilege_counter_reg == 32'd0) else $fatal("Assertion failed for SYSTEM_PRIVILEGE_COUNT");
         assert(dut.atomic_counter_reg == 32'd0) else $fatal("Assertion failed for ATOMIC_COUNT");
-    end
 
     /* Cache Profiler Test */
-    initial begin
-        clk = 0;
-        rst = 1;
-        #10 rst = 0;
+        #30
 
         //Enable the profiling unit via Wishbone
         wb_cyc <= 1;
@@ -165,6 +172,16 @@ module tb_abacus_top;
         
         wb_adr <= 32'hf0030008;
         wb_dat_i <= 1;
+        
+        
+        // Initialize inputs to zero as rising edge registers an increment to the count registers of these signals     
+        abacus_icache_request <= 0;
+        abacus_icache_miss <= 0;
+        abacus_icache_line_fill_in_progress <= 0;
+        
+        abacus_dcache_request <= 0;
+        abacus_dcache_hit <= 0;
+        abacus_dcache_line_fill_in_progress <= 0;
         
         #20 
 
@@ -203,6 +220,9 @@ module tb_abacus_top;
         abacus_dcache_hit <= 0;
         abacus_dcache_line_fill_in_progress <= 0;
 
+        #1000 // Wait 100 ns, for data consistency, the internal cache profiler registers drive the 
+              // top-level registers after an entire second (p_CLOCK_FREQ set to 100)
+              
         // Print the values of the cache profile unit registers
         $display("Cache Profile Unit Registers:");
         $display("ICACHE_REQUEST_COUNTER: %h", dut.icache_request_counter_reg);
@@ -247,6 +267,100 @@ module tb_abacus_top;
         assert(dut.dcache_hit_counter_reg == 32'd0) else $fatal("Assertion failed for DCACHE_HIT_COUNTER");
         assert(dut.dcache_line_fill_latency_counter_reg == 32'd0) else $fatal("Assertion failed for DCACHE_LINE_FILL_LATENCY_COUNTER");
 
+        /* Stall Unit Test */
+        clk = 0;
+        rst = 1;
+        #10 rst = 0;
+
+        //Enable the profiling unit via Wishbone
+        wb_cyc <= 1;
+        wb_stb <= 1;
+        wb_we <= 1;
+        
+        wb_adr <= 32'hf003000C;
+        wb_dat_i <= 1;
+        
+        #20 
+
+        wb_cyc <= 0;
+        wb_stb <= 0;
+        wb_we <= 0;
+        
+        wb_adr <= 0;
+        wb_dat_i <= 0;
+
+        assert(dut.abacus_branch_misprediction == 32'd0) else $fatal ("Assertion failed for BRANCH MISPREDICTIONS");
+        assert(dut.abacus_ras_misprediction == 32'd0) else $fatal ("Assertion failed for RAS MISPREDICTIONS");
+        assert(dut.abacus_issue_no_instruction_stat == 32'd0) else $fatal ("Assertion failed for Issue: NO INSTRUCTION ");
+        assert(dut.abacus_issue_no_id_stat == 32'd0) else $fatal ("Assertion failed for Issue: NO ID ");
+        assert(dut.abacus_issue_flush_stat == 32'd0) else $fatal ("Assertion failed for Issue: Flush ");
+        assert(dut.abacus_issue_unit_busy_stat == 32'd0) else $fatal ("Assertion failed for Issue: Unit busy ");
+        assert(dut.abacus_issue_operands_not_ready_stat == 32'd0) else $fatal ("Assertion failed for Issue: Operands not ready ");
+        assert(dut.abacus_issue_hold_stat == 32'd0) else $fatal ("Assertion failed for Issue: Hold ");
+
+        abacus_branch_misprediction <= 1;
+        #10
+        abacus_branch_misprediction <= 0;
+        
+        abacus_ras_misprediction <= 1;
+        #30
+        abacus_ras_misprediction <= 0;
+
+        abacus_issue_no_id_stat <= 1;
+        #45
+        abacus_issue_no_id_stat <= 0;
+
+        assert(dut.abacus_branch_misprediction == 32'd1) else $fatal ("Assertion failed for BRANCH MISPREDICTIONS");
+        assert(dut.abacus_ras_misprediction == 32'd3) else $fatal ("Assertion failed for RAS MISPREDICTIONS");
+        assert(dut.abacus_issue_no_instruction_stat == 32'd0) else $fatal ("Assertion failed for Issue: NO INSTRUCTION ");
+        assert(dut.abacus_issue_no_id_stat == 32'd4) else $fatal ("Assertion failed for Issue: NO ID ");
+        assert(dut.abacus_issue_flush_stat == 32'd0) else $fatal ("Assertion failed for Issue: Flush ");
+        assert(dut.abacus_issue_unit_busy_stat == 32'd0) else $fatal ("Assertion failed for Issue: Unit busy ");
+        assert(dut.abacus_issue_operands_not_ready_stat == 32'd0) else $fatal ("Assertion failed for Issue: Operands not ready ");
+        assert(dut.abacus_issue_hold_stat == 32'd0) else $fatal ("Assertion failed for Issue: Hold ");
+
+        //Disable the profiling unit via Wishbone
+        wb_cyc <= 1;
+        wb_stb <= 1;
+        wb_we <= 1;
+        
+        wb_adr <= 32'hf003000C;
+        wb_dat_i <= 0;
+        
+        #10
+        
+        assert(dut.abacus_branch_misprediction == 32'd0) else $fatal ("Assertion failed for BRANCH MISPREDICTIONS");
+        assert(dut.abacus_ras_misprediction == 32'd0) else $fatal ("Assertion failed for RAS MISPREDICTIONS");
+        assert(dut.abacus_issue_no_instruction_stat == 32'd0) else $fatal ("Assertion failed for Issue: NO INSTRUCTION ");
+        assert(dut.abacus_issue_no_id_stat == 32'd0) else $fatal ("Assertion failed for Issue: NO ID ");
+        assert(dut.abacus_issue_flush_stat == 32'd0) else $fatal ("Assertion failed for Issue: Flush ");
+        assert(dut.abacus_issue_unit_busy_stat == 32'd0) else $fatal ("Assertion failed for Issue: Unit busy ");
+        assert(dut.abacus_issue_operands_not_ready_stat == 32'd0) else $fatal ("Assertion failed for Issue: Operands not ready ");
+        assert(dut.abacus_issue_hold_stat == 32'd0) else $fatal ("Assertion failed for Issue: Hold ");
+        
+        #10 
+        # 55
+
+        assert(dut.abacus_branch_misprediction == 32'd1) else $fatal("Assertion failed for BRANCH_MISPREDICTION");
+        assert(dut.abacus_ras_misprediction == 32'd3) else $fatal("Assertion failed for RAS_MISPREDICTION");
+        assert(dut.abacus_issue_no_id_stat == 32'd4) else $fatal("Assertion failed for ISSUE_NO_ID_STAT");
+    
+
+        #10
+
+        //Re-enable the profiling unit via Wishbone
+        wb_cyc <= 1;
+        wb_stb <= 1;
+        wb_we <= 1;
+        
+        wb_adr <= 32'hf003000C;
+        wb_dat_i <= 1;
+
+        #10
+        abacus_issue_flush_stat <= 1;
+        #10
+
+        
         $finish;
     end
 

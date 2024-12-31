@@ -1,0 +1,3 @@
+[submodule "HDL/cva5/ck-cva5"]
+	path = HDL/cva5/ck-cva5
+	url = https://github.com/Rajnesh28/ck-cva5/tree/abacus
