@@ -6,7 +6,7 @@ For more information, please refer to the white paper in `/Documentation/report.
 
 ## CVA5 Core
 
-The CVA5 processor is a 32-bit RISC-V processor supporting RV32IMAD instructions, with Linux-capable user and supervisor modes. This project uses a custom fork of CVA5, modified to expose profiling nets for the profiler. For further details, visit the CVA5 repository.
+The CVA5 processor is a 32-bit RISC-V processor supporting RV32IMAD instructions, with Linux-capable user and supervisor modes. This project uses a custom fork of CVA5, modified to expose profiling nets for the profiler. For further details, visit the [CVA5 repository](https://github.com/openhwgroup/cva5).
 
 ## CPU Profiler Design
 
@@ -23,67 +23,67 @@ The top-level design integrates the CPU profiler with the CVA5 processor using a
 ### Profiling Units
 
 - **Instruction Profiling Unit**: Monitors issued instructions and categorizes them by type (e.g., Load, Store, Branch). It provides detailed insights into the frequency of each instruction type.
-- **Cache Profiling Unit**: Tracks the number of cache requests, hits, and misses, as well as the time taken to refill cache lines after misses. This helps evaluate cache reuse and replacement policies.
+- **Cache Profiling Unit**: Tracks the number of cache requests, hits, and misses, as well as the time taken to refill cache lines after misses. This helps evaluate cache reuse and replacement policies. This unit profiles both the instruction- and data caches.
 - **Stall Unit**: Profiles various causes of pipeline stalls (e.g., branch mispredictions, lack of ready instructions, operands not ready) to assist in reducing pipeline stalls and improving CPU performance.
 
 ### Memory Map
 
-                                Top-level registers beginning at `ABACUS_BASE_ADDRESS`:
+                            Top-level registers beginning at `ABACUS_BASE_ADDRESS`:
 
-                                | Register                         | Offset | Access |
-                                |-----------------------------------|--------|--------|
-                                | Instruction Profile Unit Enable   | 0x004  | R/W    |
-                                | Cache Profile Unit Enable         | 0x008  | R/W    |
-                                | Stall Unit Enable                 | 0x00c  | R/W    |
-
-
----
-
-                                Instruction Profile Unit registers** beginning at `ABACUS_BASE_ADDRESS + 0x100`:
-
-                                | Register                    | Offset | Access |
-                                |-----------------------------|--------|--------|
-                                | Load Counter                 | 0x000  | R      |
-                                | Store Counter                | 0x004  | R      |
-                                | Addition Counter             | 0x008  | R      |
-                                | Subtraction Counter          | 0x00c  | R      |
-                                | Branch Counter               | 0x010  | R      |
-                                | Jump Counter                 | 0x014  | R      |
-                                | System Privilege Counter     | 0x018  | R      |
-                                | Atomic Instruction Counter   | 0x01c  | R      |
+                            | Register                         | Offset | Access |
+                            |-----------------------------------|--------|--------|
+                            | Instruction Profile Unit Enable   | 0x004  | R/W    |
+                            | Cache Profile Unit Enable         | 0x008  | R/W    |
+                            | Stall Unit Enable                 | 0x00c  | R/W    |
 
 
 ---
 
-                                Cache Profile Unit registers** beginning at `ABACUS_BASE_ADDRESS + 0x200`:
+                            Instruction Profile Unit registers** beginning at `ABACUS_BASE_ADDRESS + 0x100`:
 
-                                | Register                        | Offset | Access |
-                                |----------------------------------|--------|--------|
-                                | ICache Request Counter           | 0x000  | R      |
-                                | ICache Hit Counter               | 0x004  | R      |
-                                | ICache Miss Counter              | 0x008  | R      |
-                                | ICache Line Fill Latency Counter | 0x00c  | R      |
-                                | DCache Request Counter           | 0x010  | R      |
-                                | DCache Hit Counter               | 0x014  | R      |
-                                | DCache Miss Counter              | 0x018  | R      |
-                                | DCache Line Fill Latency Counter | 0x01c  | R      |
+                            | Register                    | Offset | Access |
+                            |-----------------------------|--------|--------|
+                            | Load Counter                 | 0x000  | R      |
+                            | Store Counter                | 0x004  | R      |
+                            | Addition Counter             | 0x008  | R      |
+                            | Subtraction Counter          | 0x00c  | R      |
+                            | Branch Counter               | 0x010  | R      |
+                            | Jump Counter                 | 0x014  | R      |
+                            | System Privilege Counter     | 0x018  | R      |
+                            | Atomic Instruction Counter   | 0x01c  | R      |
 
 
 ---
 
-                                Stall Unit registers** beginning at `ABACUS_BASE_ADDRESS + 0x300`:
+                            Cache Profile Unit registers** beginning at `ABACUS_BASE_ADDRESS + 0x200`:
 
-                                | Register                              | Offset | Access |
-                                |----------------------------------------|--------|--------|
-                                | Branch Misprediction Counter           | 0x000  | R      |
-                                | RAS Misprediction Counter              | 0x004  | R      |
-                                | Issue stage, no instruction Counter    | 0x008  | R      |
-                                | Issue stage, no ID Counter             | 0x00c  | R      |
-                                | Issue stage, flush                     | 0x010  | R      |
-                                | Issue stage, unit was busy Counter     | 0x014  | R      |
-                                | Issue stage, operands not ready Counter| 0x018  | R      |
-                                | Issue stage, hold Counter              | 0x01c  | R      |
-                                | Issue stage, multi-source Counter      | 0x020  | R      |
+                            | Register                        | Offset | Access |
+                            |----------------------------------|--------|--------|
+                            | ICache Request Counter           | 0x000  | R      |
+                            | ICache Hit Counter               | 0x004  | R      |
+                            | ICache Miss Counter              | 0x008  | R      |
+                            | ICache Line Fill Latency Counter | 0x00c  | R      |
+                            | DCache Request Counter           | 0x010  | R      |
+                            | DCache Hit Counter               | 0x014  | R      |
+                            | DCache Miss Counter              | 0x018  | R      |
+                            | DCache Line Fill Latency Counter | 0x01c  | R      |
+
+
+---
+
+                            Stall Unit registers** beginning at `ABACUS_BASE_ADDRESS + 0x300`:
+
+                            | Register                              | Offset | Access |
+                            |----------------------------------------|--------|--------|
+                            | Branch Misprediction Counter           | 0x000  | R      |
+                            | RAS Misprediction Counter              | 0x004  | R      |
+                            | Issue stage, no instruction Counter    | 0x008  | R      |
+                            | Issue stage, no ID Counter             | 0x00c  | R      |
+                            | Issue stage, flush                     | 0x010  | R      |
+                            | Issue stage, unit was busy Counter     | 0x014  | R      |
+                            | Issue stage, operands not ready Counter| 0x018  | R      |
+                            | Issue stage, hold Counter              | 0x01c  | R      |
+                            | Issue stage, multi-source Counter      | 0x020  | R      |
 
 
 ## Software Components
